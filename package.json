@@ -1,0 +1,75 @@
+{
+  "name": "vue3-nothink-ui",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.0.0",
+  "description": "A Vue 3 UI component library",
+  "author": "Andy Wu",
+  "license": "MIT",
+  "private": false,
+  "main": "lib_dist/index.umd.js",
+  "module": "lib_dist/index.es.js",
+  "types": "lib_dist/index.d.ts",
+  "sideEffects": [
+    "**/*.css",
+    "**/*.scss",
+    "**/*.sass"
+  ],
+  "exports": {
+    ".": {
+      "types": "./lib_dist/index.d.ts",
+      "import": "./lib_dist/index.es.js",
+      "require": "./lib_dist/index.umd.js"
+    },
+    "./styles": "./lib_dist/style.css"
+  },
+  "type": "module",
+  "keywords": [
+    "vue",
+    "vue3",
+    "typescript",
+    "ui-components",
+    "component-library"
+  ],
+  "files": [
+    "lib_dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "build-lib": "run-p type-check build-lib-only",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "build-lib-only": "vite build --config vite.module.config.ts",
+    "type-check": "vue-tsc --build tsconfig.lib.json",
+    "lint": "eslint . --fix",
+    "format": "prettier --write src/"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "vue": "^3.2.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.1",
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "@vue/eslint-config-typescript": "^14.5.0",
+    "@vue/tsconfig": "^0.7.0",
+    "eslint": "^9.22.0",
+    "eslint-plugin-vue": "~10.0.0",
+    "jiti": "^2.4.2",
+    "npm-run-all2": "^7.0.2",
+    "prettier": "3.5.3",
+    "sass": "^1.89.2",
+    "sass-embedded": "^1.89.2",
+    "typescript": "~5.8.0",
+    "vite": "^6.2.4",
+    "vite-plugin-dts": "^4.5.0",
+    "vite-plugin-vue-devtools": "^7.7.2",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0",
+    "vue-tsc": "^2.2.8"
+  }
+}
