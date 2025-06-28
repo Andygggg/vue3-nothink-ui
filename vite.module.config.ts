@@ -1,8 +1,8 @@
 // vite.lib.config.ts
 import { defineConfig } from 'vite'
-import { resolve } from 'path'
 import vue from '@vitejs/plugin-vue'
 import dts from 'vite-plugin-dts'
+import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [
@@ -31,18 +31,20 @@ export default defineConfig({
     }),
   ],
 
+   resolve: {
+    alias: {
+      '@lib': resolve(__dirname, 'lib'),
+      '@': resolve(__dirname, 'lib'),
+    },
+  },
+
   build: {
     outDir: 'lib_dist',
 
     lib: {
-      entry: resolve(__dirname, 'lib/index.ts'),
-      name: 'Vue3NothinkUI',
-      formats: ['es', 'umd'],
-      fileName: (format) => {
-        if (format === 'es') return 'index.es.js'
-        if (format === 'umd') return 'index.umd.js'
-        return `index.${format}.js`
-      },
+      entry: './lib/index.ts',
+      fileName: (format) => `index.${format}.js`,
+      formats: ['es', 'cjs'], // 只保留 ES 和 CommonJS
     },
 
     rollupOptions: {

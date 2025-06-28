@@ -13,6 +13,10 @@ export default defineConfig({
       '@lib': fileURLToPath(new URL('./lib', import.meta.url)),
     },
   },
+  build: {
+    // demo 的輸出目錄
+    outDir: 'dist',
+  },
   css: {
     preprocessorOptions: {
       scss: {

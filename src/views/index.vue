@@ -4,11 +4,9 @@
       :tableSetting="tableSetting"
       :data="largeData"
       sticky-header
-      stripe
       hover
-      scrollX
-      border
       @row-click="handleRowClick"
+      class="table_style"
     >
       <template #td_name="{ item, value, isEditing, disableEdit }">
         <input
@@ -27,7 +25,6 @@
         <button @click="deleteRow(index)">刪除</button>
       </template>
     </NtTable>
-    <div>234</div>
   </div>
 </template>
 
@@ -43,7 +40,7 @@ const tableSetting = {
     { key: 'actions', title: '操作', width: '20%' },
   ],
   size: 'medium' as const,
-  maxHeight: '300px',
+  maxHeight: 'auto',
   emptyText: '暫無數據',
   loading: false,
 }
@@ -74,5 +71,9 @@ const deleteRow = (index: any) => {
   height: 100%;
   width: 100%;
   padding: 0.5rem 0.5rem;
+}
+.table_style {
+  border-radius: 8px;
+  border: 2px solid rgb(194, 194, 194);
 }
 </style>

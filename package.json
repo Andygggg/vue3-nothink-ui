@@ -8,19 +8,19 @@
   "author": "Andy Wu",
   "license": "MIT",
   "private": false,
-  "main": "lib_dist/index.umd.js",
-  "module": "lib_dist/index.es.js",
+   "main": "lib_dist/index.cjs.js",
+  "module": "lib_dist/index.es.js", 
   "types": "lib_dist/index.d.ts",
   "sideEffects": [
     "**/*.css",
     "**/*.scss",
     "**/*.sass"
   ],
-  "exports": {
+ "exports": {
     ".": {
       "types": "./lib_dist/index.d.ts",
       "import": "./lib_dist/index.es.js",
-      "require": "./lib_dist/index.umd.js"
+      "require": "./lib_dist/index.cjs.js"
     },
     "./styles": "./lib_dist/style.css"
   },
@@ -38,11 +38,12 @@
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
-    "build-lib": "run-p type-check build-lib-only",
+    "build-lib": "run-p type-check-lib build-lib-only",
     "preview": "vite preview",
     "build-only": "vite build",
     "build-lib-only": "vite build --config vite.module.config.ts",
-    "type-check": "vue-tsc --build tsconfig.lib.json",
+    "type-check": "vue-tsc --build tsconfig.json",
+    "type-check-lib": "vue-tsc --build tsconfig.lib.json",
     "lint": "eslint . --fix",
     "format": "prettier --write src/"
   },

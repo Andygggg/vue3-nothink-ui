@@ -1,5 +1,5 @@
 <template>
-  <div class="nt_table_box" :class="boxClass" :style="boxStyle">
+  <div class="nt_table_box" :class="boxClass" :style="boxStyle" ref="tableWrapper">
     <div
       ref="scrollWrapRef"
       class="nt_table_scroll_wrapper"
@@ -58,7 +58,7 @@
         </thead>
         <tbody>
           <tr
-            v-for="(row, rowIndex) in formatedData"
+            v-for="(row, rowIndex) in formattedData"
             :key="`tr_${rowIndex}`"
             @click="handleRowClick(row, rowIndex)"
           >
@@ -153,6 +153,7 @@ const emit = defineEmits<{
 const sortKey = ref<string>('') // 排序欄位
 const sortOrder = ref<'asc' | 'desc' | null>(null) // 排序狀態
 
+const tableWrapper = ref<HTMLElement | null>(null)
 const scrollWrapRef = ref<HTMLElement | null>(null) // 滾動容器引用
 const tableRef = ref<HTMLTableElement | null>(null) // 表格引用
 const headerRef = ref<HTMLElement | null>(null) // 表頭引用
@@ -166,8 +167,10 @@ const scrollHeight = ref(0)
 const clientWidth = ref(0)
 const clientHeight = ref(0)
 const headerHeight = ref(0) // 表頭高度
+const tableMaxHeight = ref(0)
 
-const resizeObserver = ref<ResizeObserver | null>(null) // 用於監聽尺寸變化
+const tableResizeObserver = ref<ResizeObserver | null>(null) // 用於監聽尺寸變化
+const scrollResizeObserver = ref<ResizeObserver | null>(null) // 用於監聽尺寸變化
 
 // 編輯狀態管理 - 使用 Set 和 Map
 const editingCells = ref<Set<string>>(new Set())
@@ -293,7 +296,9 @@ const boxStyle = computed(() => {
     style.maxHeight =
       typeof props.tableSetting.maxHeight === 'number'
         ? `${props.tableSetting.maxHeight}px`
-        : props.tableSetting.maxHeight
+        : props.tableSetting.maxHeight === 'auto'
+          ? `${tableMaxHeight.value}px`
+          : props.tableSetting.maxHeight
   }
   return style
 })
@@ -305,7 +310,9 @@ const scrollWrapperStyle = computed(() => {
     style.maxHeight =
       typeof props.tableSetting.maxHeight === 'number'
         ? `${props.tableSetting.maxHeight}px`
-        : props.tableSetting.maxHeight
+        : props.tableSetting.maxHeight === 'auto'
+          ? `${tableMaxHeight.value}px`
+          : props.tableSetting.maxHeight
   }
   if (showHorizontalScrollbar.value) {
     style.marginBottom = `${SCROLLBAR_SIZE}px`
@@ -326,7 +333,7 @@ const tableClass = computed(() => ({
 }))
 
 // 資料處理，包括排序
-const formatedData = computed(() => {
+const formattedData = computed(() => {
   if (!sortKey.value || !sortOrder.value) return props.data
 
   const sortedData = [...props.data].sort((a, b) => {
@@ -341,28 +348,45 @@ const formatedData = computed(() => {
   return sortedData
 })
 
-onMounted(() => {
+onMounted(async () => {
   if (scrollWrapRef.value) {
     scrollWrapRef.value.addEventListener('scroll', handleScroll)
 
-    resizeObserver.value = new ResizeObserver(() => {
+    scrollResizeObserver.value = new ResizeObserver(() => {
       nextTick(() => {
         updateScrollState()
       })
     })
-    resizeObserver.value.observe(scrollWrapRef.value) // 監聽容器尺寸變化
-
-    nextTick(() => {
-      updateScrollState()
-    }) // 初始載入時更新一次狀態，確保 DOM 尺寸已準備好
+    scrollResizeObserver.value.observe(scrollWrapRef.value) // 監聽容器尺寸變化
   }
+
+  if (tableWrapper.value && tableWrapper.value.parentElement) {
+    if (props.tableSetting.maxHeight === 'auto') {
+      tableResizeObserver.value = new ResizeObserver(() => {
+        nextTick(async () => {
+          await updateHeight()
+        })
+      })
+      tableResizeObserver.value.observe(tableWrapper.value.parentElement) // 監聽容器尺寸變化
+    }
+  }
+
+  await nextTick(async () => {
+    updateScrollState()
+    if (props.tableSetting.maxHeight === 'auto') await updateHeight()
+  }) // 初始載入時更新一次狀態，確保 DOM 尺寸已準備好
 })
 
 onUnmounted(() => {
   if (scrollWrapRef.value) {
     scrollWrapRef.value.removeEventListener('scroll', handleScroll)
-    resizeObserver.value?.unobserve(scrollWrapRef.value)
+    scrollResizeObserver.value?.unobserve(scrollWrapRef.value)
   }
+
+  if (tableWrapper.value && tableWrapper.value.parentElement) {
+    tableResizeObserver.value?.unobserve(tableWrapper.value.parentElement) // 監聽容器尺寸變化
+  }
+
   document.removeEventListener('mousemove', handleScrollbarMousemove)
   document.removeEventListener('mouseup', handleScrollbarMouseup)
   document.documentElement.classList.remove('no-select')
@@ -623,7 +647,7 @@ const handleEdit = (rowIndex: number, colIndex: number) => {
 
   // 保存原始值，用於取消編輯
   const col = props.tableSetting.header[colIndex]
-  const originalValue = formatedData.value[rowIndex][col.key]
+  const originalValue = formattedData.value[rowIndex][col.key]
   originalValues.value.set(cellKey, originalValue)
 
   // 設置編輯狀態
@@ -645,7 +669,7 @@ const cancelEdit = (rowIndex: number, colIndex: number) => {
   // 恢復原始值
   if (originalValues.value.has(cellKey)) {
     const originalValue = originalValues.value.get(cellKey)
-    formatedData.value[rowIndex][col.key] = originalValue
+    formattedData.value[rowIndex][col.key] = originalValue
   }
 
   disableEdit(rowIndex, colIndex)
@@ -684,6 +708,19 @@ const confirmAllEditing = (): void => {
   })
 }
 
+const updateHeight = async () => {
+  await nextTick()
+
+  if (!tableWrapper.value) return
+  const parent = tableWrapper.value.parentElement
+
+  if (!parent) return
+  const style = getComputedStyle(parent)
+
+  tableMaxHeight.value =
+    parent.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)
+}
+
 defineExpose({
   handleEdit,
   disableEdit,
@@ -702,8 +739,8 @@ defineExpose({
   position: relative;
   width: 100%;
   height: auto;
-  border-radius: 8px;
-  border: 2px solid rgb(194, 194, 194);
+  // border-radius: 8px;
+  // border: 2px solid rgb(194, 194, 194);
   overflow: hidden;
 
   // CSS 變數定義 - 使用者可以覆寫這些變數來自定義顏色
@@ -727,10 +764,6 @@ defineExpose({
 
   --nt-loading-overlay-bg: rgba(255, 255, 255, 0.9);
   --nt-loading-color: #409eff;
-
-  --nt-scrollbar-track: transparent;
-  --nt-scrollbar-thumb: #616161;
-  --nt-scrollbar-thumb-hover: #a8a8a8;
 
   // 自定義滾動條顏色變數
   --nt-scrollbar-track: rgba(0, 0, 0, 0.1); // 滾動條軌道
