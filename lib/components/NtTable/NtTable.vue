@@ -26,7 +26,7 @@
                       xmlns="http://www.w3.org/2000/svg"
                       xmlns:xlink="http://www.w3.org/1999/xlink"
                       viewBox="0 0 24 24"
-                      v-show="(sortKey === col.key && sortOrder === 'asc') || sortKey !== col.key"
+                      v-show="sortManager.isSorting(col.key, 'asc')"
                     >
                       <g fill="none">
                         <path
@@ -41,7 +41,7 @@
                       xmlns="http://www.w3.org/2000/svg"
                       xmlns:xlink="http://www.w3.org/1999/xlink"
                       viewBox="0 0 24 24"
-                      v-show="(sortKey === col.key && sortOrder === 'desc') || sortKey !== col.key"
+                      v-show="sortManager.isSorting(col.key, 'desc')"
                     >
                       <g fill="none">
                         <path
@@ -72,14 +72,14 @@
               <slot
                 :name="`td_${col.key}`"
                 :item="row"
-                :value="row[col.key]"
+                :value="row[col.key as keyof T]"
                 :index="rowIndex"
                 :isEditing="isEditing(rowIndex, colIndex)"
                 :handleEdit="() => handleEdit(rowIndex, colIndex)"
                 :disableEdit="() => disableEdit(rowIndex, colIndex)"
                 :cancelEdit="() => cancelEdit(rowIndex, colIndex)"
               >
-                {{ row[col.key] ?? '' }}
+                {{ row[col.key as keyof T] ?? '' }}
               </slot>
             </td>
           </tr>
@@ -125,11 +125,13 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="T = Record<string, any>">
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
+
+import { SortManager } from '@lib/utils';
 import type { TableProps, TableColumn } from '@lib/typing'
 
-const props = withDefaults(defineProps<TableProps>(), {
+const props = withDefaults(defineProps<TableProps<T>>(), {
   tableSetting: () => ({
     header: [] as TableColumn[],
     size: 'medium',
@@ -146,12 +148,13 @@ const props = withDefaults(defineProps<TableProps>(), {
 })
 
 const emit = defineEmits<{
-  (e: 'rowClick', row: any, index: number): void
+  (e: 'rowClick', row: T, index: number): void
   (e: 'sortChange', key: string, order: 'asc' | 'desc' | null): void
 }>()
 
 const sortKey = ref<string>('') // 排序欄位
 const sortOrder = ref<'asc' | 'desc' | null>(null) // 排序狀態
+const sortedData = ref<T[]>([...props.data])
 
 const tableWrapper = ref<HTMLElement | null>(null)
 const scrollWrapRef = ref<HTMLElement | null>(null) // 滾動容器引用
@@ -333,19 +336,20 @@ const tableClass = computed(() => ({
 }))
 
 // 資料處理，包括排序
-const formattedData = computed(() => {
-  if (!sortKey.value || !sortOrder.value) return props.data
+const formattedData = computed((): T[] => {
+  // if (!sortKey.value || !sortOrder.value) return props.data
 
-  const sortedData = [...props.data].sort((a, b) => {
-    const aVal = a[sortKey.value] ?? ''
-    const bVal = b[sortKey.value] ?? ''
+  // const sortedData = [...props.data].sort((a, b) => {
+  //   const aVal = (a as any)[sortKey.value] ?? ''
+  //   const bVal = (b as any)[sortKey.value] ?? ''
 
-    if (aVal === bVal) return 0
+  //   if (aVal === bVal) return 0
 
-    const result = aVal > bVal ? 1 : -1
-    return sortOrder.value === 'asc' ? result : -result
-  })
-  return sortedData
+  //   const result = aVal > bVal ? 1 : -1
+  //   return sortOrder.value === 'asc' ? result : -result
+  // })
+  const result: T[] = sortedData.value as T[] ?? props.data
+  return result
 })
 
 onMounted(async () => {
@@ -401,6 +405,11 @@ watch(
   },
   { deep: true, immediate: true },
 )
+
+ //使用排序管理器
+const sortManager = new SortManager(props.data, (key, order) => {
+  emit('sortChange', key, order)
+})
 
 /**
  * 自訂列 style
@@ -510,24 +519,25 @@ const getCellClass = (col: TableColumn) => ({
 const handleSort = (col: TableColumn) => {
   if (!col.sortable) return
 
-  if (sortKey.value === col.key) {
-    if (sortOrder.value === 'asc') {
-      sortOrder.value = 'desc'
-    } else if (sortOrder.value === 'desc') {
-      sortOrder.value = null
-      sortKey.value = ''
-    } else {
-      sortOrder.value = 'asc'
-    }
-  } else {
-    sortKey.value = col.key
-    sortOrder.value = 'asc'
-  }
+  // if (sortKey.value === col.key) {
+  //   if (sortOrder.value === 'asc') {
+  //     sortOrder.value = 'desc'
+  //   } else if (sortOrder.value === 'desc') {
+  //     sortOrder.value = null
+  //     sortKey.value = ''
+  //   } else {
+  //     sortOrder.value = 'asc'
+  //   }
+  // } else {
+  //   sortKey.value = col.key
+  //   sortOrder.value = 'asc'
+  // }
 
-  emit('sortChange', sortKey.value, sortOrder.value)
+  // emit('sortChange', sortKey.value, sortOrder.value)
+  sortedData.value = sortManager.toggleSort(col.key)
 }
 
-const handleRowClick = (row: any, index: number) => {
+const handleRowClick = (row: T, index: number) => {
   emit('rowClick', row, index)
 }
 
@@ -647,7 +657,7 @@ const handleEdit = (rowIndex: number, colIndex: number) => {
 
   // 保存原始值，用於取消編輯
   const col = props.tableSetting.header[colIndex]
-  const originalValue = formattedData.value[rowIndex][col.key]
+  const originalValue = formattedData.value[rowIndex][col.key as keyof T]
   originalValues.value.set(cellKey, originalValue)
 
   // 設置編輯狀態
@@ -669,7 +679,7 @@ const cancelEdit = (rowIndex: number, colIndex: number) => {
   // 恢復原始值
   if (originalValues.value.has(cellKey)) {
     const originalValue = originalValues.value.get(cellKey)
-    formattedData.value[rowIndex][col.key] = originalValue
+    ;(formattedData.value[rowIndex] as any)[col.key] = originalValue
   }
 
   disableEdit(rowIndex, colIndex)

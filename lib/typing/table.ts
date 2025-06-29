@@ -17,9 +17,9 @@ export interface TableSetting {
   loading?: boolean // 載入狀態
 }
 
-export interface TableProps {
+export interface TableProps<T = any> {
   tableSetting: TableSetting // 表格設定
-  data: any[] // 資料
+  data: T[] // 資料 - 使用泛型 T
   stripe?: boolean // 條紋
   border?: boolean // 邊框
   hover?: boolean // hover效果
