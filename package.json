@@ -3,26 +3,28 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A Vue 3 UI component library",
   "author": "Andy Wu",
   "license": "MIT",
   "private": false,
-   "main": "lib_dist/index.cjs.js",
-  "module": "lib_dist/index.es.js", 
+  "main": "lib_dist/index.cjs.js",
+  "module": "lib_dist/index.es.js",
   "types": "lib_dist/index.d.ts",
   "sideEffects": [
     "**/*.css",
     "**/*.scss",
     "**/*.sass"
   ],
- "exports": {
+  "exports": {
     ".": {
       "types": "./lib_dist/index.d.ts",
       "import": "./lib_dist/index.es.js",
       "require": "./lib_dist/index.cjs.js"
     },
-    "./styles": "./lib_dist/style.css"
+    "./styles": "./lib_dist/vue3-nothink-ui.css",
+    "./style.css": "./lib_dist/vue3-nothink-ui.css",
+    "./css": "./lib_dist/vue3-nothink-ui.css"
   },
   "type": "module",
   "keywords": [
