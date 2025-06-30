@@ -20,7 +20,7 @@
                 <slot :name="`th_${col.key}`" :item="col" :value="col.title" :index="colIdx">
                   <span>{{ col.title }}</span>
                 </slot>
-                <span class="sort_btn" v-if="col.sortable">
+                <span class="sort_btn" v-if="isCheckSort(col.sortable)">
                   <i>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -128,7 +128,7 @@
 <script setup lang="ts" generic="T = Record<string, any>">
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 
-import { SortManager } from '@lib/utils';
+import { SortManager } from '@lib/utils'
 import type { TableProps, TableColumn } from '@lib/typing'
 
 const props = withDefaults(defineProps<TableProps<T>>(), {
@@ -152,9 +152,12 @@ const emit = defineEmits<{
   (e: 'sortChange', key: string, order: 'asc' | 'desc' | null): void
 }>()
 
-const sortKey = ref<string>('') // 排序欄位
-const sortOrder = ref<'asc' | 'desc' | null>(null) // 排序狀態
-const sortedData = ref<T[]>([...props.data])
+//排序管理器
+const sortManager = ref<SortManager<T>>(
+  new SortManager(props.data, (key, order) => {
+    emit('sortChange', key, order)
+  }),
+)
 
 const tableWrapper = ref<HTMLElement | null>(null)
 const scrollWrapRef = ref<HTMLElement | null>(null) // 滾動容器引用
@@ -337,19 +340,7 @@ const tableClass = computed(() => ({
 
 // 資料處理，包括排序
 const formattedData = computed((): T[] => {
-  // if (!sortKey.value || !sortOrder.value) return props.data
-
-  // const sortedData = [...props.data].sort((a, b) => {
-  //   const aVal = (a as any)[sortKey.value] ?? ''
-  //   const bVal = (b as any)[sortKey.value] ?? ''
-
-  //   if (aVal === bVal) return 0
-
-  //   const result = aVal > bVal ? 1 : -1
-  //   return sortOrder.value === 'asc' ? result : -result
-  // })
-  const result: T[] = sortedData.value as T[] ?? props.data
-  return result
+  return sortManager.value.sortData as T[]
 })
 
 onMounted(async () => {
@@ -406,10 +397,13 @@ watch(
   { deep: true, immediate: true },
 )
 
- //使用排序管理器
-const sortManager = new SortManager(props.data, (key, order) => {
-  emit('sortChange', key, order)
-})
+watch(
+  () => props.data,
+  (newData) => {
+    sortManager.value.updateData(newData)
+  },
+  { deep: true },
+)
 
 /**
  * 自訂列 style
@@ -494,8 +488,7 @@ const getFixedPosition = (col: TableColumn, colIndex: number) => {
  * @param col 列配置
  */
 const getHeaderClass = (col: TableColumn) => ({
-  sortable: col.sortable,
-  sorted: sortKey.value === col.key,
+  sortable: isCheckSort(col.sortable),
   [`text-${col.align}`]: col.align,
   'fixed-left': col.fixed === 'left',
   'fixed-right': col.fixed === 'right',
@@ -517,24 +510,12 @@ const getCellClass = (col: TableColumn) => ({
  * @param col 列配置
  */
 const handleSort = (col: TableColumn) => {
-  if (!col.sortable) return
+  if (!isCheckSort(col.sortable)) return
+  sortManager.value.toggleSort(col.key)
+}
 
-  // if (sortKey.value === col.key) {
-  //   if (sortOrder.value === 'asc') {
-  //     sortOrder.value = 'desc'
-  //   } else if (sortOrder.value === 'desc') {
-  //     sortOrder.value = null
-  //     sortKey.value = ''
-  //   } else {
-  //     sortOrder.value = 'asc'
-  //   }
-  // } else {
-  //   sortKey.value = col.key
-  //   sortOrder.value = 'asc'
-  // }
-
-  // emit('sortChange', sortKey.value, sortOrder.value)
-  sortedData.value = sortManager.toggleSort(col.key)
+const isCheckSort = (status: number | undefined) => {
+  return typeof status === 'number' ? true : false
 }
 
 const handleRowClick = (row: T, index: number) => {

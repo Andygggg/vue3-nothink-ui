@@ -64,6 +64,7 @@
 import { ref, computed, onMounted } from 'vue'
 import NtTable from '@lib/components/NtTable/NtTable.vue'
 import type { TableSetting, TableEditMethods } from '@lib/typing'
+import { DataType } from '@lib/typing'
 
 // 定義用戶數據類型
 interface UserData {
@@ -78,7 +79,7 @@ type SortOrder = 'asc' | 'desc' | null
 
 // 組件狀態
 const isLoading = ref<boolean>(false)
-const tableRef = ref<(TableEditMethods) | null>(null)
+const tableRef = ref<TableEditMethods | null>(null)
 
 // 表格設定
 const tableSetting = computed<TableSetting>(() => ({
@@ -87,21 +88,21 @@ const tableSetting = computed<TableSetting>(() => ({
       key: 'id',
       title: 'ID',
       width: '15%',
-      sortable: true,
+      sortable: DataType.NUMBER,
       align: 'center' as const,
     },
     {
       key: 'name',
       title: '姓名',
       width: '25%',
-      sortable: true,
+      sortable: DataType.AUTO,
     },
     {
       key: 'email',
       title: '信箱',
       width: '30%',
       ellipsis: true,
-      sortable: true,
+      sortable: DataType.AUTO,
     },
     {
       key: 'phone',

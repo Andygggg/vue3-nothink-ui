@@ -1,29 +1,5 @@
-/**
- * 排序順序類型
- */
-export type SortStatus = 'asc' | 'desc' | null
-
-/**
- * 排序狀態接口
- */
-export interface SortState {
-  key: string
-  order: SortStatus
-}
-
-/**
- * 排序配置接口
- */
-export interface SortConfig<T = any> {
-  key: keyof T
-  customSort?: (a: T, b: T, key: keyof T) => number
-  transform?: (value: any) => any
-}
-
-/**
- * 排序事件回調類型
- */
-export type SortChangeCallback = (key: string, order: SortStatus) => void
+import type { SortStatus, SortChangeCallback } from '@lib/typing'
+import { DataType, SortOrder } from '@lib/typing'
 
 /**
  * 排序管理器
@@ -44,24 +20,18 @@ export class SortManager<T = any> {
   }
 
   /**
-   * 獲取當前排序鍵
-   */
-  get sortKey(): string {
-    return this._sortKey
-  }
-
-  /**
    * 獲取當前排序順序
    */
-  get sortOrder(): SortStatus {
-    return this._sortOrder
+  get sortData(): T[] {
+    return this._sortData
   }
 
-  /**
-   * 獲取當前排序順序
-   */
-  get sortData (): T[] {
-    return this._sortData 
+  get sortInfo(): { key: string; status: SortStatus; data: T[] } {
+    return {
+      key: this._sortKey,
+      status: this._sortOrder,
+      data: this._sortData,
+    }
   }
 
   /**
@@ -92,7 +62,7 @@ export class SortManager<T = any> {
   private setSortState(key: string, order: SortStatus, type: DataType): void {
     this._sortKey = key
     this._sortOrder = order
-    
+
     // 執行排序
     this.performSort(key, order, type)
   }
@@ -130,40 +100,55 @@ export class SortManager<T = any> {
   }
 
   /**
+   * 更新原始資料 (會重置排序狀態)
+   */
+  public updateData(newData: T[]): void {
+    this._originalData = [...newData]
+    this._typeComparer.setData(newData)
+
+    // 如果目前有排序，重新執行排序
+    if (this._sortOrder !== null && this._sortKey) {
+      this.performSort(this._sortKey, this._sortOrder, this._typeComparer.getDataType())
+    } else {
+      this._sortData = [...newData]
+      this._onSortChange?.(this._sortKey, this._sortOrder)
+    }
+  }
+
+  /**
+   * 批量排序 (多欄位排序)
+   */
+  public multiSort(sortConfigs: Array<{ key: string; order: SortStatus; type?: DataType }>): void {
+    const validConfigs = sortConfigs
+      .filter((config) => config.order !== null)
+      .map((config) => ({
+        key: config.key as keyof T,
+        order: config.order === 'asc' ? SortOrder.ASC : SortOrder.DESC,
+        type: config.type || DataType.AUTO,
+      }))
+
+    if (validConfigs.length === 0) {
+      this.resetSort()
+      return
+    }
+
+    this._typeComparer.setData(this._originalData)
+    this._sortData = this._typeComparer.multiSort(validConfigs)
+
+    // 設置主要排序狀態 (第一個排序條件)
+    const primarySort = sortConfigs[0]
+    this._sortKey = primarySort.key
+    this._sortOrder = primarySort.order
+
+    this._onSortChange?.(this._sortKey, this._sortOrder)
+  }
+
+  /**
    * 檢查指定鍵是否正在排序
    */
   public isSorting(key: string, status: string | null): boolean {
     return (this._sortKey === key && this._sortOrder === status) || this._sortKey !== key
   }
-}
-
-/**
- * 資料類型枚舉
- */
-export enum DataType {
-  AUTO = 0, // 自動偵測
-  STRING = 1, // 字串
-  STRING_IGNORE_CASE = 2, // 字串(忽略大小寫)
-  NUMBER = 3, // 數字
-  DATE = 4, // 日期
-  BOOLEAN = 5, // 布林值
-  VERSION = 6, // 版本號
-  CHINESE = 7, // 中文排序
-  IP_ADDRESS = 8, // IP地址
-  EMAIL = 9, // 電子郵件
-  PHONE = 10, // 電話號碼
-  CURRENCY = 11, // 貨幣
-  PERCENTAGE = 12, // 百分比
-  FILE_SIZE = 13, // 檔案大小
-  CUSTOM = 99, // 自定義
-}
-
-/**
- * 排序方向枚舉
- */
-export enum SortOrder {
-  ASC = 'asc',
-  DESC = 'desc',
 }
 
 /**
@@ -197,8 +182,6 @@ export class TypeComparer<T> {
       .slice(0, 5)
 
     if (samples.length === 0) return DataType.STRING
-
-    // const firstSample = String(samples[0]).trim()
 
     // 數字判斷
     if (samples.every((val) => !isNaN(Number(val)) && !isNaN(parseFloat(String(val))))) {

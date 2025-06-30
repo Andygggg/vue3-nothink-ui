@@ -4,7 +4,7 @@ export interface TableColumn {
   width?: string | number // 寬度
   minWidth?: string | number // 最小寬度
   align?: 'left' | 'center' | 'right' // 對齊方式
-  sortable?: boolean // 是否可排序
+  sortable?: number // 是否可排序
   fixed?: 'left' | 'right' // 是否固定在左側或右側
   ellipsis?: boolean // 是否省略文字
 }

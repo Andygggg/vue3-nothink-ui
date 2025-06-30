@@ -1,1 +1,2 @@
-export * from './table'
+export * from './compontents/table'
+export * from './utils/sort'
