@@ -5,6 +5,8 @@
       :data="largeData"
       sticky-header
       hover
+      stripe
+      cellBorder
       @row-click="handleRowClick"
       @sort-change="handleSortChange"
       class="table_style"

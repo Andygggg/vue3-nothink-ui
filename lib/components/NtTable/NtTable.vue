@@ -737,13 +737,13 @@ defineExpose({
   // CSS 變數定義 - 使用者可以覆寫這些變數來自定義顏色
   --nt-header-bg: #ffffff;
   --nt-header-color: #000000;
-  --nt-header-border: #cacaca;
+  --nt-header-border: #ebeef5;
 
   --nt-cell-color: #000000;
   --nt-cell-bg: transparent;
-  --nt-cell-border: #e2e2e2;
+  --nt-cell-border: #ebeef5;
 
-  --nt-stripe-bg: #f5f5f5;
+  --nt-stripe-bg: #fafafa;
   --nt-hover-bg: #e8f4fd;
 
   --nt-fixed-bg: #2a2a2a;
