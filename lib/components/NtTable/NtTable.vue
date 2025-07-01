@@ -140,7 +140,7 @@ const props = withDefaults(defineProps<TableProps<T>>(), {
     loading: false,
   }),
   stripe: false,
-  border: false,
+  cellBorder: false,
   hover: false,
   scrollX: false,
   scrollY: false,
@@ -332,7 +332,7 @@ const scrollWrapperStyle = computed(() => {
 // nt_table class
 const tableClass = computed(() => ({
   'nt_table--stripe': props.stripe,
-  'nt_table--border': props.border,
+  'nt_table--border': props.cellBorder,
   'nt_table--hover': props.hover,
   [`nt_table--${props.tableSetting.size}`]: props.tableSetting.size,
   'nt_table--loading': props.tableSetting.loading,
@@ -741,7 +741,7 @@ defineExpose({
 
   --nt-cell-color: #000000;
   --nt-cell-bg: transparent;
-  --nt-cell-border: #cacaca;
+  --nt-cell-border: #e2e2e2;
 
   --nt-stripe-bg: #f5f5f5;
   --nt-hover-bg: #e8f4fd;
@@ -931,6 +931,7 @@ defineExpose({
   }
 
   td {
+    border-bottom: 2px solid var(--nt-cell-border);
     > span {
       color: red;
     }
@@ -1002,7 +1003,6 @@ defineExpose({
 
     td {
       border-right: 1px solid var(--nt-cell-border);
-      border-bottom: 1px solid var(--nt-cell-border);
 
       &:last-child {
         border-right: none;

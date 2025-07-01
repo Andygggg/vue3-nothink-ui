@@ -21,7 +21,7 @@ export interface TableProps<T = any> {
   tableSetting: TableSetting // 表格設定
   data: T[] // 資料 - 使用泛型 T
   stripe?: boolean // 條紋
-  border?: boolean // 邊框
+  cellBorder?: boolean // 邊框
   hover?: boolean // hover效果
   scrollX?: boolean // 水平滾動
   scrollY?: boolean // 垂直滾動
