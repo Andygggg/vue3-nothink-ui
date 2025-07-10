@@ -8,6 +8,11 @@ const router = createRouter({
       name: 'table',
       component: () => import('../views/index.vue'),
     },
+    {
+      path: '/TreeList',
+      name: 'TreeList',
+      component: () => import('../views/Data/TreeList.vue'),
+    },
   ],
 })
 
