@@ -35,8 +35,18 @@
           @delete="handleDelete"
         >
           <!-- 自定義節點內容插槽範例 -->
-          <template #tree_special="{ node }">
+          <template #tree_label="{ node }">
             <span style="color: #ff6b6b; font-weight: bold"> ⭐ {{ node.label }} (特殊節點) </span>
+          </template>
+          <template #addFolderButton="{ onAddFolder }">
+            <button
+              class="custom-add-btn"
+              @click="onAddFolder"
+              title="建立新資料夾"
+            >
+              <span class="btn-icon">📁</span>
+              <span class="btn-text">新增</span>
+            </button>
           </template>
         </TreeWithLines>
       </div>
