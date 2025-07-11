@@ -7,6 +7,7 @@
           :index="index"
           :has-children="hasChildren(node.id)"
           :is-folder="isFolder(node)"
+          :is-edit-tree="props.isEditTree"
           @drag-start="handleDragStart"
           @drag-over="handleDragOver"
           @drop="handleDrop"
@@ -42,7 +43,9 @@ import type {
   DragEndData,
 } from '@lib/typing'
 
-const props = defineProps<TreeData>()
+const props = withDefaults(defineProps<TreeData>(), {
+  isEditTree: false,
+})
 
 // 使用函式重載語法定義 emit 類型
 const emit = defineEmits<{
@@ -56,7 +59,6 @@ const emit = defineEmits<{
   (e: 'delete', deletedNode: FlatTreeNode, children: FlatTreeNode[]): void
 }>()
 
-// 獲取插槽，避免使用 $ 符號
 const slots = useSlots()
 
 const treeData = ref<FlatTreeNode[]>([...props.data])
@@ -79,7 +81,6 @@ const dragIndicator = reactive({
     top: '0px',
     left: '0px',
     width: '0px',
-    background: 'linear-gradient(90deg, #007bff, #0056b3)',
   },
 })
 
@@ -171,6 +172,7 @@ const toggleNode = (nodeId: string): void => {
 
 // 處理拖曳開始
 const handleDragStart = (data: DragStartData): void => {
+  if (!props.isEditTree) return
   dragData.value = {
     node: data.node,
     sourceIndex: data.index,
@@ -200,19 +202,16 @@ const handleDragOver = (data: DragOverData): void => {
     dragIndicator.style.top = `${rect.top + window.scrollY + 4}px`
     dragIndicator.style.left = `${rect.left + (node.level + 1) * 20 + 10}px`
     dragIndicator.style.width = `${rect.width - (node.level + 1) * 20 - 20}px`
-    dragIndicator.style.background = 'linear-gradient(90deg, #28a745, #20c997)'
   } else if (finalPosition === 'before') {
     // 拖曳到節點前面
     dragIndicator.style.top = `${rect.top + window.scrollY}px`
     dragIndicator.style.left = `${rect.left + node.level * 20 + 10}px`
     dragIndicator.style.width = `${rect.width - node.level * 20 - 20}px`
-    dragIndicator.style.background = 'linear-gradient(90deg, #007bff, #0056b3)'
   } else {
     // 拖曳到節點後面
     dragIndicator.style.top = `${rect.top + window.scrollY + height}px`
     dragIndicator.style.left = `${rect.left + node.level * 20 + 10}px`
     dragIndicator.style.width = `${rect.width - node.level * 20 - 20}px`
-    dragIndicator.style.background = 'linear-gradient(90deg, #007bff, #0056b3)'
   }
 
   // 儲存拖曳位置信息
@@ -476,26 +475,31 @@ defineExpose({
 
 <style lang="scss" scoped>
 .tree_box {
+  --nt-tree-bg: transparent;
+  --nt-drag-line: linear-gradient(90deg, #007bff, #0056b3);
+  --nt-drag-line-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+  --nt-drag-dot: #007bff;
+
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: white;
+  background: var(--nt-tree-bg);
   // border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  // border-radius: 8px;
   overflow: hidden;
 
   .tree_list {
     position: relative;
     min-height: 100px;
-    background: white;
+    background: var(--nt-tree-bg);
   }
 
   .drag_indicator {
     position: absolute;
     height: 3px;
-    background: linear-gradient(90deg, #007bff, #0056b3);
+    background: var(--nt-drag-line);
     border-radius: 2px;
     z-index: 1000;
     pointer-events: none;
-    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+    box-shadow: var(--nt-drag-line-shadow);
 
     &::before {
       content: '';
@@ -505,20 +509,7 @@ defineExpose({
       width: 9px;
       height: 9px;
       border-radius: 50%;
-      background: #007bff;
-      box-shadow: 0 0 6px rgba(0, 123, 255, 0.6);
-    }
-
-    &::after {
-      content: '';
-      position: absolute;
-      right: -6px;
-      top: -3px;
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: #0056b3;
-      box-shadow: 0 0 6px rgba(0, 86, 179, 0.6);
+      background: var(--nt-drag-dot);
     }
   }
 }

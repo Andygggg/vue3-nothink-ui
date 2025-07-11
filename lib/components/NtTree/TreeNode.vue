@@ -11,7 +11,7 @@
       :style="{
         paddingLeft: `${props.node.level * 20 + 16}px`,
       }"
-      :draggable="true"
+      :draggable="props.isEditTree"
       @dragstart="onDragStart"
       @dragover="onDragOver"
       @dragleave="onDragLeave"
@@ -30,7 +30,7 @@
       </div>
 
       <button class="toggle_btn" v-if="hasChildren" @click.stop="onToggle">
-        <span class="toggle_icon" :class="{ expanded: props.node.expanded }">
+        <span class="toggle_icon" :class="{ expanded: !props.node.expanded }">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
             <path
               d="M143 352.3L7 216.3c-9.4-9.4-9.4-24.6 0-33.9l22.6-22.6c9.4-9.4 24.6-9.4 33.9 0l96.4 96.4l96.4-96.4c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9l-136 136c-9.2 9.4-24.4 9.4-33.8 0z"
@@ -45,7 +45,7 @@
         </slot>
       </span>
 
-      <div class="node_actions" v-if="!isDragging">
+      <div class="node_actions" v-if="!isDragging && props.isEditTree">
         <button
           v-if="isFolder"
           class="action_btn add_folder"
@@ -132,6 +132,7 @@ const isDragOver = ref(false)
 const hasChildren = computed(() => props.hasChildren)
 
 const onDragStart = (event: DragEvent): void => {
+  if (!props.isEditTree) return
   isDragging.value = true
   if (event.dataTransfer) {
     event.dataTransfer.effectAllowed = 'move'
@@ -197,6 +198,14 @@ const onDelete = (): void => {
 
 <style lang="scss" scoped>
 .tree_node_row {
+  --nt-node-hover: #e8f4fd;
+  --nt-draging-bg: #e3f2fd;
+  --nt-dragover-border: 2px dashed #007bff;
+  --nt-tree-line: #d0d0d0;
+  --nt-toggle-btn: #a3a3a3;
+  --nt-toggle-btn-hover: #666;
+  --nt-tree-text: #333;
+
   width: 100%;
   height: auto;
   transition: height 0.3s ease;
@@ -216,7 +225,7 @@ const onDelete = (): void => {
   position: relative;
 
   &:hover {
-    background-color: #e8f4fd;
+    background-color: var(--nt-node-hover);
 
     > .node_actions {
       opacity: 1;
@@ -225,21 +234,21 @@ const onDelete = (): void => {
 
   &.dragging {
     opacity: 0.5;
-    background-color: #e3f2fd;
+    background-color: var(--nt-draging-bg);
     transform: scale(0.98);
   }
 
   &.folder {
     &.dragover {
-      border: 2px dashed #007bff;
+      border: var(--nt-dragover-border);
     }
   }
 
-  &.file {
-    &.dragover {
-      border-bottom: 2px solid #007bff;
-    }
-  }
+  // &.file {
+  //   &.dragover {
+  //     // border-bottom: 2px solid #007bff;
+  //   }
+  // }
 }
 
 .tree_line {
@@ -256,7 +265,7 @@ const onDelete = (): void => {
     top: 0;
     bottom: 0;
     width: 2px;
-    background-color: #d0d0d0;
+    background-color: var(--nt-tree-line);
   }
 }
 
@@ -266,7 +275,7 @@ const onDelete = (): void => {
   padding: 4px;
   margin-right: 8px;
   cursor: pointer;
-  color: #a3a3a3;
+  color: var(--nt-toggle-btn);
   transition: all 0.2s ease;
   border-radius: 4px;
   width: 28px;
@@ -277,7 +286,7 @@ const onDelete = (): void => {
   flex-shrink: 0; // 防止按鈕被壓縮
 
   &:hover {
-    color: #666;
+    color: var(--nt-toggle-btn-hover);
   }
 
   .toggle_icon {
@@ -295,21 +304,23 @@ const onDelete = (): void => {
     svg {
       width: 100%;
       height: 100%;
-      display: block; // 移除inline元素的baseline問題
+      display: block;
     }
   }
 }
 
 .tree_label {
   font-size: 14px;
-  color: #333;
+  color: var(--nt-tree-text);
   user-select: none;
-  flex: 1; // 讓文字佔滿剩餘空間
+  flex: 1;
 }
 
 .node_actions {
   margin-left: auto;
   display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
   align-items: center;
   gap: 4px;
   opacity: 0;

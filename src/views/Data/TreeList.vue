@@ -26,10 +26,7 @@
         <TreeWithLines
           ref="treeRef"
           v-model:data="flatTreeData"
-          :class="{
-            'hide-lines': !showLines,
-            [`theme-${lineStyle}`]: lineStyle !== 'solid',
-          }"
+          isEditTree
           @node-click="handleNodeClick"
           @drag-start="handleDragStart"
           @drop="handleDrop"
@@ -74,8 +71,6 @@ import TreeWithLines from '@lib/components/NtTree/NtTree.vue'
 import type { TreeNode as FlatTreeNode } from '@lib/typing'
 
 const treeRef = ref()
-const showLines = ref(true)
-const lineStyle = ref('solid')
 
 // 扁平化樹狀數據
 const flatTreeData = ref<FlatTreeNode[]>([

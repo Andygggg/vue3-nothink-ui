@@ -14,10 +14,12 @@ export interface TreeNodeData {
   index: number
   hasChildren: boolean // 由父組件計算並傳入
   isFolder: boolean // 新增：是否為資料夾
+  isEditTree: boolean
 }
 
 export interface TreeData {
   data: TreeNode[]
+  isEditTree?: boolean
 }
 
 export interface DragStartData {
