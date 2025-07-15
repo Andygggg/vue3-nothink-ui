@@ -5,7 +5,7 @@ export interface TreeNode {
   level: number
   expanded?: boolean
   order?: number
-  type?: 'folder' | 'file'
+  type?: 'parent' | 'children'
   allowChildren?: boolean
 }
 
@@ -13,13 +13,17 @@ export interface TreeNodeData {
   node: TreeNode
   index: number
   hasChildren: boolean // 由父組件計算並傳入
-  isFolder: boolean // 新增：是否為資料夾
+  isParent: boolean // 新增：是否為資料夾
   isEditTree: boolean
+  hover: boolean
+  stripe: boolean
 }
 
 export interface TreeData {
   data: TreeNode[]
   isEditTree?: boolean
+  hover?: boolean
+  stripe?: boolean
 }
 
 export interface DragStartData {

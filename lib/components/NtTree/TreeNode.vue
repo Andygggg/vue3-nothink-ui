@@ -1,15 +1,11 @@
 <template>
   <div class="tree_node_row">
     <div
-      class="parent_node"
-      :class="{
-        dragging: isDragging,
-        dragover: isDragOver,
-        folder: props.isFolder,
-        file: !props.isFolder,
-      }"
+      class="node_row"
+      :class="treeNodeClass"
       :style="{
         paddingLeft: `${props.node.level * 20 + 16}px`,
+        cursor: props.isEditTree ? 'move' : 'default',
       }"
       :draggable="props.isEditTree"
       @dragstart="onDragStart"
@@ -20,7 +16,7 @@
       @click="onNodeClick"
     >
       <div class="tree_line">
-        <!-- 垂直線：顯示從父級到當前層級的連接 -->
+        <!-- 層級線 -->
         <div
           v-for="level in props.node.level"
           :key="`v-line-${level}`"
@@ -29,6 +25,7 @@
         ></div>
       </div>
 
+      <!-- 展開icon -->
       <button class="toggle_btn" v-if="hasChildren" @click.stop="onToggle">
         <span class="toggle_icon" :class="{ expanded: !props.node.expanded }">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
@@ -39,20 +36,41 @@
           </svg>
         </span>
       </button>
-      <span class="tree_label">
-        <slot name="tree_label" :node="node">
+
+      <!-- 節點標題 -->
+      <span class="tree_label" @dblclick="editNodeLabel">
+        <div class="edit_input" v-if="isEditLabel">
+          <input
+            type="text"
+            ref="labelInput"
+            v-model="editingLabel"
+            @keyup.enter="saveLabel"
+            @keyup.escape="cancelEdit"
+            @blur="cancelEdit"
+          />
+          <button class="action_btn check" title="確認" @click="saveLabel">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 512 512"
+            >
+              <path
+                d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69L432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"
+                fill="currentColor"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <slot name="tree_label" :node="node" v-else>
           {{ node.label }}
         </slot>
       </span>
 
+      <!-- 操作工具列 -->
       <div class="node_actions" v-if="!isDragging && props.isEditTree">
-        <slot name="addFolderButton" :isFolder="isFolder" :onAddFolder="onAddFolder" v-if="isFolder">
-          <!-- 默认新增资料夹按钮 -->
-          <button
-            class="action_btn add_folder"
-            @click="onAddFolder"
-            title="新增資料夾"
-          >
+        <slot name="addFolderButton" :onAddParent="onAddParent" v-if="isParent">
+          <button class="action_btn add_folder" @click="onAddParent" title="新增資料夾">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
               <g fill="none">
                 <path
@@ -63,42 +81,21 @@
             </svg>
           </button>
         </slot>
-        <!-- <button
-          v-if="isFolder"
-          class="action_btn add_folder"
-          @click.stop="onAddFolder"
-          title="新增資料夾"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 20 20"
-          >
-            <g fill="none">
+        <slot name="addFileButton" :onAddChildren="onAddChildren" v-if="isParent">
+          <button class="action_btn add_file" @click.stop="onAddChildren" title="新增檔案">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 1024 1024"
+            >
               <path
-                d="M4.5 3A2.5 2.5 0 0 0 2 5.5v9A2.5 2.5 0 0 0 4.5 17h5.1a5.465 5.465 0 0 1-.393-1H4.5A1.5 1.5 0 0 1 3 14.5v-7h4.071a1.5 1.5 0 0 0 1.087-.466L9.619 5.5H15.5A1.5 1.5 0 0 1 17 7v2.6c.358.183.693.404 1 .657V7a2.5 2.5 0 0 0-2.5-2.5H9.667l-1.6-1.2a1.5 1.5 0 0 0-.9-.3H4.5zM3 5.5A1.5 1.5 0 0 1 4.5 4h2.667a.5.5 0 0 1 .3.1l1.227.92l-1.26 1.325a.5.5 0 0 1-.363.155H3v-1zm16 9a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0zm-4-2a.5.5 0 0 0-1 0V14h-1.5a.5.5 0 0 0 0 1H14v1.5a.5.5 0 0 0 1 0V15h1.5a.5.5 0 0 0 0-1H15v-1.5z"
+                d="M854.6 288.6L639.4 73.4c-6-6-14.1-9.4-22.6-9.4H192c-17.7 0-32 14.3-32 32v832c0 17.7 14.3 32 32 32h640c17.7 0 32-14.3 32-32V311.3c0-8.5-3.4-16.7-9.4-22.7zM790.2 326H602V137.8L790.2 326zm1.8 562H232V136h302v216a42 42 0 0 0 42 42h216v494zM544 472c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v108H372c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h108v108c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V644h108c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8H544V472z"
                 fill="currentColor"
               ></path>
-            </g>
-          </svg>
-        </button> -->
-        <button
-          v-if="isFolder"
-          class="action_btn add_file"
-          @click.stop="onAddFile"
-          title="新增檔案"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 1024 1024"
-          >
-            <path
-              d="M854.6 288.6L639.4 73.4c-6-6-14.1-9.4-22.6-9.4H192c-17.7 0-32 14.3-32 32v832c0 17.7 14.3 32 32 32h640c17.7 0 32-14.3 32-32V311.3c0-8.5-3.4-16.7-9.4-22.7zM790.2 326H602V137.8L790.2 326zm1.8 562H232V136h302v216a42 42 0 0 0 42 42h216v494zM544 472c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v108H372c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8h108v108c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V644h108c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8H544V472z"
-              fill="currentColor"
-            ></path>
-          </svg>
-        </button>
+            </svg>
+          </button>
+        </slot>
+        <slot name="onDeleteButton" :onDelete="onDelete"></slot>
         <button class="action_btn delete" @click.stop="onDelete" title="刪除">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -126,7 +123,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import type { TreeNode, TreeNodeData } from '@lib/typing'
 
 const props = defineProps<TreeNodeData>()
@@ -138,46 +135,72 @@ const emit = defineEmits<{
   (e: 'drag-end'): void
   (e: 'toggle', nodeId: string): void
   (e: 'node-click', node: TreeNode): void
-  (e: 'add-folder', parentNode: TreeNode): void
-  (e: 'add-file', parentNode: TreeNode): void
+  (e: 'add-parent', parentNode: TreeNode): void
+  (e: 'add-childen', parentNode: TreeNode): void
   (e: 'delete', node: TreeNode): void
+  (e: 'node-update', data: { node: TreeNode; newLabel: string }): void
 }>()
 
 defineSlots<{
-  tree_label: (props: {
-    node: TreeNode
-  }) => any
-  
-  // 新增资料夹按钮 slot
-  addFolderButton: (props: {
-    isFolder: boolean
-    onAddFolder: () => void
-  }) => any
+  tree_label: (props: { node: TreeNode }) => any
+  addFolderButton: (props: { onAddParent: () => void }) => any
+  addFileButton: (props: { onAddChildren: () => void }) => any
+  onDeleteButton: (props: { onDelete: () => void }) => any
 }>()
 
-const isDragging = ref(false)
-const isDragOver = ref(false)
+const isDragging = ref(false) //拖曳中
+const isDragOver = ref(false) //拖曳覆蓋
+const isEditLabel = ref(false) //修改標題
+const labelInput = ref<HTMLInputElement | null>(null) //標題input dom
+const editingLabel = ref('') //標題
 
-const hasChildren = computed(() => props.hasChildren)
+const hasChildren = computed(() => props.hasChildren) //是否顯示展開icon
 
+//tree node class
+const treeNodeClass = computed(() => ({
+  'nt_tree_node--dragging': isDragging.value,
+  'nt_tree_node--dragover': isDragOver.value,
+  nt_tree_folder: props.isParent,
+  'nt_tree_node--hover': props.hover,
+  'nt_tree_node--stripe': props.stripe,
+}))
+
+//=================================拖曳=================================
+
+/**
+ * 開始拖曳
+ * @param event 拖曳事件
+ */
 const onDragStart = (event: DragEvent): void => {
+  //1.判斷是否為編輯狀態
   if (!props.isEditTree) return
+
+  //2.進入拖曳模式
   isDragging.value = true
   if (event.dataTransfer) {
     event.dataTransfer.effectAllowed = 'move'
   }
+
+  //3.回傳父組件
   emit('drag-start', {
     node: props.node,
     index: props.index,
   })
 }
 
+/**
+ * 拖曳覆蓋其他節點
+ * @param event 拖曳事件
+ */
 const onDragOver = (event: DragEvent): void => {
+  //1.拖曳狀態
   event.preventDefault()
   if (event.dataTransfer) {
     event.dataTransfer.dropEffect = 'move'
   }
   isDragOver.value = true
+
+  //2.回傳父組件
   emit('drag-over', {
     event,
     node: props.node,
@@ -185,13 +208,23 @@ const onDragOver = (event: DragEvent): void => {
   })
 }
 
+/**
+ * 離開放置區域
+ */
 const onDragLeave = (): void => {
   isDragOver.value = false
 }
 
+/**
+ * 放置節點至新位置
+ * @param event 拖曳事件
+ */
 const onDrop = (event: DragEvent): void => {
+  //1.拖曳狀態
   event.preventDefault()
   isDragOver.value = false
+
+  //2.回傳父組件
   emit('drop', {
     event,
     node: props.node,
@@ -199,29 +232,82 @@ const onDrop = (event: DragEvent): void => {
   })
 }
 
+/**
+ * 結束拖曳
+ */
 const onDragEnd = (): void => {
   isDragging.value = false
   emit('drag-end')
 }
 
+//=================================節點=================================
+
+/**
+ * 展開子節點
+ */
 const onToggle = (): void => {
   emit('toggle', props.node.id)
 }
 
+/**
+ * 節點點擊觸發
+ */
 const onNodeClick = (): void => {
   emit('node-click', props.node)
 }
 
-const onAddFolder = (): void => {
-  emit('add-folder', props.node)
+/**
+ * 新增父節點
+ */
+const onAddParent = (): void => {
+  emit('add-parent', props.node)
 }
 
-const onAddFile = (): void => {
-  emit('add-file', props.node)
+/**
+ * 新增子節點
+ */
+const onAddChildren = (): void => {
+  emit('add-childen', props.node)
 }
 
+/**
+ * 刪除節點
+ */
 const onDelete = (): void => {
   emit('delete', props.node)
+}
+
+//=================================標題=================================
+
+/**
+ * 編輯標題
+ */
+const editNodeLabel = async () => {
+  if (!isEditLabel.value) {
+    // 1.進入編輯模式，保存原始值
+    editingLabel.value = props.node.label
+    isEditLabel.value = true
+
+    // 2.選中所有文字，方便編輯
+    await nextTick()
+    labelInput.value?.focus()
+    labelInput.value?.select()
+  }
+}
+
+/**
+ * 儲存標題
+ */
+const saveLabel = () => {
+  isEditLabel.value = false
+  emit('node-update', { node: props.node, newLabel: editingLabel.value })
+}
+
+/**
+ * 取消編輯標題
+ */
+const cancelEdit = () => {
+  isEditLabel.value = false
 }
 </script>
 
@@ -234,13 +320,14 @@ const onDelete = (): void => {
   --nt-toggle-btn: #a3a3a3;
   --nt-toggle-btn-hover: #666;
   --nt-tree-text: #333;
+  --nt-tree-stripe: 1px solid #e0e0e0;
 
   width: 100%;
   height: auto;
   transition: height 0.3s ease;
 }
 
-.parent_node {
+.node_row {
   padding: 12px 16px;
   min-height: 48px;
   display: flex;
@@ -248,36 +335,34 @@ const onDelete = (): void => {
   flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-start;
-  // border-bottom: 1px solid #f0f0f0;
-  cursor: move;
   transition: all 0.2s ease;
   position: relative;
 
+  &.nt_tree_node--stripe {
+    border-bottom: var(--nt-tree-stripe);
+  }
+
   &:hover {
-    background-color: var(--nt-node-hover);
+    &.nt_tree_node--hover {
+      background-color: var(--nt-node-hover);
+    }
 
     > .node_actions {
       opacity: 1;
     }
   }
 
-  &.dragging {
+  &.nt_tree_node--dragging {
     opacity: 0.5;
     background-color: var(--nt-draging-bg);
     transform: scale(0.98);
   }
 
-  &.folder {
-    &.dragover {
+  &.nt_tree_folder {
+    &.nt_tree_node--dragover {
       border: var(--nt-dragover-border);
     }
   }
-
-  // &.file {
-  //   &.dragover {
-  //     // border-bottom: 2px solid #007bff;
-  //   }
-  // }
 }
 
 .tree_line {
@@ -343,6 +428,29 @@ const onDelete = (): void => {
   color: var(--nt-tree-text);
   user-select: none;
   flex: 1;
+
+  > .edit_input {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
+
+    > input {
+      width: 80%;
+      padding: 8px;
+      border: 1px solid #409eff;
+      border-radius: 4px;
+      outline: none;
+
+      &:focus {
+        border-color: #66b1ff;
+        box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+      }
+    }
+  }
 }
 
 .node_actions {
@@ -356,42 +464,46 @@ const onDelete = (): void => {
   transition: opacity 0.2s ease;
   position: relative;
   z-index: 2;
+}
 
-  .action_btn {
-    background: none;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    padding: 4px 6px;
-    font-size: 12px;
-    cursor: pointer;
+.action_btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 28px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 20px;
+    height: 20px;
     transition: all 0.2s ease;
-    min-width: 28px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  }
 
-    svg {
-      width: 20px;
-      height: 20px;
-      transition: all 0.2s ease;
-    }
+  &:hover {
+    transform: scale(1.2);
+  }
 
-    &:hover {
-      transform: scale(1.2);
-    }
+  &.check {
+    color: #09a809;
+  }
 
-    &.add_folder {
-      color: #f7ac0a;
-    }
+  &.add_folder {
+    color: #f7ac0a;
+  }
 
-    &.add_file {
-      color: #007bff;
-    }
+  &.add_file {
+    color: #007bff;
+  }
 
-    &.delete {
-      color: #dc3545;
-    }
+  &.delete {
+    color: #dc3545;
   }
 }
 </style>

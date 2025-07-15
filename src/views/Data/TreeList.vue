@@ -5,50 +5,21 @@
     </div>
 
     <div class="content">
-      <!-- 操作按鈕 -->
-      <div class="actions">
-        <div class="action-group">
-          <h4>🌳 樹操作</h4>
-          <button @click="expandAll">展開全部</button>
-          <button @click="collapseAll">收合全部</button>
-          <button @click="resetData">重置數據</button>
-        </div>
-
-        <div class="action-group">
-          <h4>➕ 新增節點</h4>
-          <button @click="addRootFolder">新增根資料夾</button>
-          <button @click="addRootFile">新增根檔案</button>
-        </div>
-      </div>
-
       <!-- 樹組件 -->
       <div class="tree-wrapper">
-        <TreeWithLines
-          ref="treeRef"
+        <nt-tree
           v-model:data="flatTreeData"
           isEditTree
           @node-click="handleNodeClick"
           @drag-start="handleDragStart"
           @drop="handleDrop"
-          @add-folder="handleAddFolder"
-          @add-file="handleAddFile"
-          @delete="handleDelete"
+          @update:data="handleStatus"
         >
           <!-- 自定義節點內容插槽範例 -->
           <template #tree_label="{ node }">
-            <span style="color: #ff6b6b; font-weight: bold"> ⭐ {{ node.label }} (特殊節點) </span>
+            <span style="font-weight: bold">{{ node.label }}</span>
           </template>
-          <template #addFolderButton="{ onAddFolder }">
-            <button
-              class="custom-add-btn"
-              @click="onAddFolder"
-              title="建立新資料夾"
-            >
-              <span class="btn-icon">📁</span>
-              <span class="btn-text">新增</span>
-            </button>
-          </template>
-        </TreeWithLines>
+        </nt-tree>
       </div>
 
       <!-- 說明和事件日誌 -->
@@ -76,11 +47,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import TreeWithLines from '@lib/components/NtTree/NtTree.vue'
+import NtTree from '@lib/components/NtTree/NtTree.vue'
 
 import type { TreeNode as FlatTreeNode } from '@lib/typing'
-
-const treeRef = ref()
 
 // 扁平化樹狀數據
 const flatTreeData = ref<FlatTreeNode[]>([
@@ -92,7 +61,7 @@ const flatTreeData = ref<FlatTreeNode[]>([
     level: 0,
     expanded: true,
     order: 1,
-    type: 'folder',
+    type: 'parent',
   },
   {
     id: '2',
@@ -101,7 +70,7 @@ const flatTreeData = ref<FlatTreeNode[]>([
     level: 0,
     expanded: true,
     order: 2,
-    type: 'folder',
+    type: 'parent',
   },
   {
     id: '3',
@@ -110,7 +79,7 @@ const flatTreeData = ref<FlatTreeNode[]>([
     level: 0,
     expanded: false,
     order: 3,
-    type: 'folder',
+    type: 'parent',
   },
 
   // 第二層
@@ -121,7 +90,7 @@ const flatTreeData = ref<FlatTreeNode[]>([
     level: 1,
     expanded: true,
     order: 1,
-    type: 'folder',
+    type: 'parent',
   },
   {
     id: '1-2',
@@ -130,7 +99,7 @@ const flatTreeData = ref<FlatTreeNode[]>([
     level: 1,
     expanded: false,
     order: 2,
-    type: 'folder',
+    type: 'parent',
   },
   {
     id: '1-3',
@@ -139,11 +108,11 @@ const flatTreeData = ref<FlatTreeNode[]>([
     level: 1,
     expanded: true,
     order: 3,
-    type: 'folder',
+    type: 'parent',
   },
-  { id: '1-4', label: 'README.md', parentId: '1', level: 1, order: 4, type: 'file' },
+  { id: '1-4', label: 'README.md', parentId: '1', level: 1, order: 4, type: 'children' },
 
-  { id: '2-1', label: '季度報告.xlsx', parentId: '2', level: 1, order: 1, type: 'file' },
+  { id: '2-1', label: '季度報告.xlsx', parentId: '2', level: 1, order: 1, type: 'children' },
   {
     id: '2-2',
     label: '數據分析',
@@ -151,9 +120,9 @@ const flatTreeData = ref<FlatTreeNode[]>([
     level: 1,
     expanded: false,
     order: 2,
-    type: 'folder',
+    type: 'parent',
   },
-  { id: '2-3', label: '會議記錄.docx', parentId: '2', level: 1, order: 3, type: 'file' },
+  { id: '2-3', label: '會議記錄.docx', parentId: '2', level: 1, order: 3, type: 'children' },
 
   {
     id: '3-1',
@@ -162,9 +131,9 @@ const flatTreeData = ref<FlatTreeNode[]>([
     level: 1,
     expanded: false,
     order: 1,
-    type: 'folder',
+    type: 'parent',
   },
-  { id: '3-2', label: '參考文檔', parentId: '3', level: 1, order: 2, type: 'folder' },
+  { id: '3-2', label: '參考文檔', parentId: '3', level: 1, order: 2, type: 'parent' },
 
   // 第三層
   {
@@ -174,32 +143,32 @@ const flatTreeData = ref<FlatTreeNode[]>([
     level: 2,
     expanded: false,
     order: 1,
-    type: 'folder',
+    type: 'parent',
   },
-  { id: '1-1-2', label: '樣式文件', parentId: '1-1', level: 2, order: 2, type: 'folder' },
-  { id: '1-1-3', label: '配置文件', parentId: '1-1', level: 2, order: 3, type: 'file' },
+  { id: '1-1-2', label: '樣式文件', parentId: '1-1', level: 2, order: 2, type: 'parent' },
+  { id: '1-1-3', label: '配置文件', parentId: '1-1', level: 2, order: 3, type: 'children' },
 
-  { id: '1-2-1', label: '路由定義', parentId: '1-2', level: 2, order: 1, type: 'file' },
-  { id: '1-2-2', label: '數據模型', parentId: '1-2', level: 2, order: 2, type: 'file' },
+  { id: '1-2-1', label: '路由定義', parentId: '1-2', level: 2, order: 1, type: 'children' },
+  { id: '1-2-2', label: '數據模型', parentId: '1-2', level: 2, order: 2, type: 'children' },
 
-  { id: '1-3-1', label: 'API 文檔.md', parentId: '1-3', level: 2, order: 1, type: 'file' },
-  { id: '1-3-2', label: '需求規格.md', parentId: '1-3', level: 2, order: 2, type: 'file' },
-  { id: '1-3-3', label: '測試計畫.md', parentId: '1-3', level: 2, order: 3, type: 'file' },
+  { id: '1-3-1', label: 'API 文檔.md', parentId: '1-3', level: 2, order: 1, type: 'children' },
+  { id: '1-3-2', label: '需求規格.md', parentId: '1-3', level: 2, order: 2, type: 'children' },
+  { id: '1-3-3', label: '測試計畫.md', parentId: '1-3', level: 2, order: 3, type: 'children' },
 
   // 第四層
-  { id: '1-1-1-1', label: 'TreeNode.vue', parentId: '1-1-1', level: 3, order: 1, type: 'file' },
+  { id: '1-1-1-1', label: 'TreeNode.vue', parentId: '1-1-1', level: 3, order: 1, type: 'children' },
   {
     id: '1-1-1-2',
     label: 'DraggableTree.vue',
     parentId: '1-1-1',
     level: 3,
     order: 2,
-    type: 'file',
+    type: 'children',
   },
-  { id: '1-1-1-3', label: 'Button.vue', parentId: '1-1-1', level: 3, order: 3, type: 'file' },
+  { id: '1-1-1-3', label: 'Button.vue', parentId: '1-1-1', level: 3, order: 3, type: 'children' },
 
   // 特殊節點（用於展示自定義插槽）
-  { id: 'special', label: '特殊功能節點', parentId: '1-1', level: 2, order: 4, type: 'file' },
+  { id: 'special', label: '特殊功能節點', parentId: '1-1', level: 2, order: 4, type: 'children' },
 ])
 
 // 事件日誌
@@ -218,110 +187,23 @@ const addLog = (type: string, message: string) => {
 
 // 事件處理器
 const handleNodeClick = (node: FlatTreeNode) => {
-  addLog('click', `點擊了 ${node.label}`)
+  addLog('點擊', `點擊了 ${node.label}`)
+  console.log('點擊', node)
 }
 
 const handleDragStart = (data: any) => {
-  addLog('drag', `開始拖曳 ${data.node.label}`)
+  addLog('開始拖曳', `開始拖曳 ${data.node.label}`)
 }
 
 const handleDrop = (sourceData: any, targetData: any) => {
   const position = targetData.dropPosition || 'after'
   const positionText =
     position === 'inside' ? '移入' : position === 'before' ? '移到前面' : '移到後面'
-  addLog('drop', `${sourceData.node.label} ${positionText} ${targetData.node.label}`)
+  addLog('移入', `${sourceData.node.label} ${positionText} ${targetData.node.label}`)
 }
 
-const handleAddFolder = (parentNode: FlatTreeNode) => {
-  addLog('add', `在 ${parentNode.label} 中新增資料夾`)
-}
-
-const handleAddFile = (parentNode: FlatTreeNode) => {
-  addLog('add', `在 ${parentNode.label} 中新增檔案`)
-}
-
-const handleDelete = (deletedNode: FlatTreeNode, children: FlatTreeNode[]) => {
-  const childCount = children.length - 1
-  addLog('delete', `刪除 ${deletedNode.label}${childCount > 0 ? ` 及 ${childCount} 個子項目` : ''}`)
-}
-
-// 操作方法
-const expandAll = () => {
-  treeRef.value?.expandAll()
-  addLog('expand', '展開全部節點')
-}
-
-const collapseAll = () => {
-  treeRef.value?.collapseAll()
-  addLog('collapse', '收合全部節點')
-}
-
-const addRootFolder = () => {
-  const newNode = {
-    id: `root-folder-${Date.now()}`,
-    label: `📁 新資料夾 ${new Date().toLocaleTimeString()}`,
-    parentId: null,
-    type: 'folder' as const,
-    expanded: false,
-    order: flatTreeData.value.filter((n) => n.parentId === null).length + 1,
-  }
-
-  treeRef.value?.addNode(newNode)
-  addLog('add', '新增根資料夾')
-}
-
-const addRootFile = () => {
-  const newNode = {
-    id: `root-file-${Date.now()}`,
-    label: `📄 新檔案 ${new Date().toLocaleTimeString()}.txt`,
-    parentId: null,
-    type: 'file' as const,
-    order: flatTreeData.value.filter((n) => n.parentId === null).length + 1,
-  }
-
-  treeRef.value?.addNode(newNode)
-  addLog('add', '新增根檔案')
-}
-
-const resetData = () => {
-  flatTreeData.value = [
-    {
-      id: 'demo-1',
-      label: '🎯 示範專案',
-      parentId: null,
-      level: 0,
-      expanded: true,
-      order: 1,
-      type: 'folder',
-    },
-    {
-      id: 'demo-1-1',
-      label: '📋 源碼',
-      parentId: 'demo-1',
-      level: 1,
-      expanded: true,
-      order: 1,
-      type: 'folder',
-    },
-    { id: 'demo-1-2', label: '📝 文檔', parentId: 'demo-1', level: 1, order: 2, type: 'folder' },
-    {
-      id: 'demo-1-1-1',
-      label: '🎨 main.js',
-      parentId: 'demo-1-1',
-      level: 2,
-      order: 1,
-      type: 'file',
-    },
-    {
-      id: 'demo-1-1-2',
-      label: '⚙️ config.json',
-      parentId: 'demo-1-1',
-      level: 2,
-      order: 2,
-      type: 'file',
-    },
-  ]
-  addLog('reset', '重置為示範數據')
+const handleStatus = (data: FlatTreeNode[]) => {
+  addLog('修改', `資料 ${data.length}`)
 }
 </script>
 
@@ -514,47 +396,13 @@ const resetData = () => {
         font-size: 11px;
         margin-right: 8px;
         text-transform: uppercase;
+        background: #fef3c7;
+        color: #d97706;
       }
 
       .log-message {
         color: #374151;
         font-weight: 500;
-      }
-
-      &.log-click .log-type {
-        background: #dbeafe;
-        color: #1e40af;
-      }
-
-      &.log-drag .log-type {
-        background: #fef3c7;
-        color: #d97706;
-      }
-
-      &.log-drop .log-type {
-        background: #d1fae5;
-        color: #059669;
-      }
-
-      &.log-add .log-type {
-        background: #e0f2fe;
-        color: #0891b2;
-      }
-
-      &.log-delete .log-type {
-        background: #fee2e2;
-        color: #dc2626;
-      }
-
-      &.log-expand .log-type,
-      &.log-collapse .log-type {
-        background: #f3e8ff;
-        color: #7c3aed;
-      }
-
-      &.log-reset .log-type {
-        background: #f1f5f9;
-        color: #475569;
       }
     }
   }
