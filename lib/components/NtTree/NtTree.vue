@@ -62,7 +62,7 @@
           @delete="handleDelete"
           @node-update="handleNodeUpdate"
         >
-          <template v-for="(slotContent, slotName) in slots" #[slotName]="slotData">
+          <template v-for="(_, slotName) in slots" #[slotName]="slotData">
             <slot :name="slotName" v-bind="slotData"></slot>
           </template>
         </TreeNode>
