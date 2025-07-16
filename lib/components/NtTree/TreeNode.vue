@@ -38,9 +38,14 @@
       </button>
 
       <!-- 節點標題 -->
-      <span class="tree_label" @dblclick="editNodeLabel">
-        <div class="edit_input" v-if="isEditLabel">
+      <div
+        class="tree_label"
+        :class="{ selected: props.currentNodeId === props.node.id }"
+        @dblclick="editNodeLabel(props.node.id)"
+      >
+        <div class="edit_input" v-if="isEditNode">
           <input
+            :id="'input' + props.node.id"
             type="text"
             ref="labelInput"
             v-model="editingLabel"
@@ -63,9 +68,9 @@
         </div>
 
         <slot name="tree_label" :node="node" v-else>
-          {{ node.label }}
+          <span style="cursor: default">{{ node.label }}</span>
         </slot>
-      </span>
+      </div>
 
       <!-- 操作工具列 -->
       <div class="node_actions" v-if="!isDragging && props.isEditTree">
@@ -123,10 +128,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 import type { TreeNode, TreeNodeData } from '@lib/typing'
 
-const props = defineProps<TreeNodeData>()
+const props = withDefaults(defineProps<TreeNodeData>(), {
+  isEditing: false,
+})
 
 const emit = defineEmits<{
   (e: 'drag-start', data: { node: TreeNode; index: number }): void
@@ -139,6 +146,7 @@ const emit = defineEmits<{
   (e: 'add-childen', parentNode: TreeNode): void
   (e: 'delete', node: TreeNode): void
   (e: 'node-update', data: { node: TreeNode; newLabel: string }): void
+  (e: 'node-selected', label: string | null): void
 }>()
 
 defineSlots<{
@@ -150,11 +158,14 @@ defineSlots<{
 
 const isDragging = ref(false) //拖曳中
 const isDragOver = ref(false) //拖曳覆蓋
-const isEditLabel = ref(false) //修改標題
 const labelInput = ref<HTMLInputElement | null>(null) //標題input dom
 const editingLabel = ref('') //標題
 
 const hasChildren = computed(() => props.hasChildren) //是否顯示展開icon
+//編輯狀態判斷
+const isEditNode = computed(() => {
+  return props.currentNodeId === props.node.id && props.isEditing
+})
 
 //tree node class
 const treeNodeClass = computed(() => ({
@@ -165,6 +176,23 @@ const treeNodeClass = computed(() => ({
   'nt_tree_node--stripe': props.stripe,
 }))
 
+//判斷是否為新增節點直接開啟inpit
+watch(
+  () => isEditNode.value,
+  async (newVal) => {
+    if (newVal && props.currentNodeId === props.node.id) {
+      editingLabel.value = props.node.label
+
+      // 等待 DOM 更新
+      await nextTick()
+      if (labelInput.value) {
+        labelInput.value.focus()
+        labelInput.value.select()
+      }
+    }
+  },
+  { immediate: true },
+)
 //=================================拖曳=================================
 
 /**
@@ -282,24 +310,22 @@ const onDelete = (): void => {
 /**
  * 編輯標題
  */
-const editNodeLabel = async () => {
-  if (!isEditLabel.value) {
-    // 1.進入編輯模式，保存原始值
-    editingLabel.value = props.node.label
-    isEditLabel.value = true
+const editNodeLabel = async (nodeId: string) => {
+  // 1.進入編輯模式，保存原始值
+  emit('node-selected', nodeId) // 發出選中事件
+  editingLabel.value = props.node.label
 
-    // 2.選中所有文字，方便編輯
-    await nextTick()
-    labelInput.value?.focus()
-    labelInput.value?.select()
-  }
+  // 2.選中所有文字，方便編輯
+  await nextTick()
+  labelInput.value?.focus()
+  labelInput.value?.select()
 }
 
 /**
  * 儲存標題
  */
 const saveLabel = () => {
-  isEditLabel.value = false
+  emit('node-selected', null)
   emit('node-update', { node: props.node, newLabel: editingLabel.value })
 }
 
@@ -307,7 +333,7 @@ const saveLabel = () => {
  * 取消編輯標題
  */
 const cancelEdit = () => {
-  isEditLabel.value = false
+  emit('node-selected', null)
 }
 </script>
 
@@ -321,6 +347,8 @@ const cancelEdit = () => {
   --nt-toggle-btn-hover: #666;
   --nt-tree-text: #333;
   --nt-tree-stripe: 1px solid #e0e0e0;
+  --nt-tree-selected-text: #007bff;
+  --nt-tree-selected-bg: transparent;
 
   width: 100%;
   height: auto;
@@ -429,6 +457,11 @@ const cancelEdit = () => {
   user-select: none;
   flex: 1;
 
+  &.selected {
+    color: var(--nt-tree-selected-text);
+    background: var(--nt-tree-selected-bg);
+  }
+
   > .edit_input {
     width: 100%;
     display: flex;
@@ -441,6 +474,7 @@ const cancelEdit = () => {
     > input {
       width: 80%;
       padding: 8px;
+      color: var(--nt-tree-text);
       border: 1px solid #409eff;
       border-radius: 4px;
       outline: none;

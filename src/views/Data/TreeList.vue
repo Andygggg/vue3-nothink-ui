@@ -17,7 +17,7 @@
         >
           <!-- 自定義節點內容插槽範例 -->
           <template #tree_label="{ node }">
-            <span style="font-weight: bold">{{ node.label }}</span>
+            <span style="font-weight: bold; cursor: default">{{ node.label }}</span>
           </template>
         </nt-tree>
       </div>
@@ -59,7 +59,7 @@ const flatTreeData = ref<FlatTreeNode[]>([
     label: '我的專案',
     parentId: null,
     level: 0,
-    expanded: true,
+    expanded: false,
     order: 1,
     type: 'parent',
   },
@@ -68,7 +68,7 @@ const flatTreeData = ref<FlatTreeNode[]>([
     label: '工作文件',
     parentId: null,
     level: 0,
-    expanded: true,
+    expanded: false,
     order: 2,
     type: 'parent',
   },
@@ -88,7 +88,7 @@ const flatTreeData = ref<FlatTreeNode[]>([
     label: '前端專案',
     parentId: '1',
     level: 1,
-    expanded: true,
+    expanded: false,
     order: 1,
     type: 'parent',
   },
@@ -106,7 +106,7 @@ const flatTreeData = ref<FlatTreeNode[]>([
     label: '專案文檔',
     parentId: '1',
     level: 1,
-    expanded: true,
+    expanded: false,
     order: 3,
     type: 'parent',
   },
@@ -188,7 +188,7 @@ const addLog = (type: string, message: string) => {
 // 事件處理器
 const handleNodeClick = (node: FlatTreeNode) => {
   addLog('點擊', `點擊了 ${node.label}`)
-  console.log('點擊', node)
+  // console.log('點擊', node)
 }
 
 const handleDragStart = (data: any) => {

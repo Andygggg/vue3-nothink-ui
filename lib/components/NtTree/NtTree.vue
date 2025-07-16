@@ -42,13 +42,15 @@
       </div>
 
       <!-- 樹狀節點 -->
-      <template v-for="(node, index) in visibleNodes" :key="node.id">
+      <template v-for="(node, index) in treeNodes" :key="node.id">
         <TreeNode
           :node="node"
           :index="index"
           :has-children="hasChildren(node.id)"
           :is-parent="isParentNode(node)"
           :is-edit-tree="props.isEditTree"
+          :is-editing="isEditing"
+          :current-node-id="currentNodeId"
           :hover="props.hover"
           :stripe="props.stripe"
           @drag-start="handleDragStart"
@@ -61,6 +63,7 @@
           @add-childen="handleAddChildren"
           @delete="handleDelete"
           @node-update="handleNodeUpdate"
+          @node-selected="handleNodeSelected"
         >
           <template v-for="(_, slotName) in slots" #[slotName]="slotData">
             <slot :name="slotName" v-bind="slotData"></slot>
@@ -104,6 +107,8 @@ const emit = defineEmits<{
 const slots = useSlots()
 
 const treeData = ref<FlatTreeNode[]>([...props.data]) //樹狀列表資料
+const isEditing = ref(false)
+const currentNodeId: Ref<string | null> = ref(null) //當前節點id
 // 拖曳狀態
 const dragData: Ref<{
   node: FlatTreeNode | null
@@ -127,7 +132,7 @@ const dragIndicator = reactive({
 })
 
 // 樹狀列表（根據展開狀態計算可見節點）
-const visibleNodes = computed(() => {
+const treeNodes = computed(() => {
   // 1.tree list紀錄展開狀態
   const expandedMap = new Map<string, boolean>()
 
@@ -395,6 +400,7 @@ const toggleNode = (nodeId: string): void => {
   if (node) {
     node.expanded = !node.expanded
   }
+  isEditing.value = false
 }
 
 /**
@@ -402,6 +408,7 @@ const toggleNode = (nodeId: string): void => {
  * @param node 子組件回傳資料
  */
 const handleNodeClick = (node: FlatTreeNode): void => {
+  if (!isEditing.value) currentNodeId.value = node.id
   emit('node-click', node)
 }
 
@@ -452,6 +459,9 @@ const handleAddChildren = (parentNode: FlatTreeNode): void => {
   parentNode.expanded = true
 }
 
+/**
+ * 新增父根節點
+ */
 const addRootParent = () => {
   const newNode = {
     id: `root-parent-${Date.now()}`,
@@ -465,6 +475,9 @@ const addRootParent = () => {
   addNode(newNode)
 }
 
+/**
+ * 新增根節點
+ */
 const addRootChildren = () => {
   const newNode = {
     id: `root-children-${Date.now()}`,
@@ -476,6 +489,11 @@ const addRootChildren = () => {
   addNode(newNode)
 }
 
+/**
+ * 新增節點
+ * @param newNode 新節點
+ * @param parentId 父層Id
+ */
 const addNode = (
   newNode: Omit<FlatTreeNode, 'level' | 'parentId'>,
   parentId: string | null = null,
@@ -488,6 +506,9 @@ const addNode = (
     level,
     order: newNode.order || getNextOrder(parentId),
   }
+
+  currentNodeId.value = finalNode.id
+  isEditing.value = true
 
   treeData.value.push(finalNode)
   emit('update:data', treeData.value)
@@ -551,10 +572,26 @@ const handleNodeUpdate = (data: { node: FlatTreeNode; newLabel: string }) => {
   if (currentData) currentData.label = data.newLabel
 }
 
+/**
+ * 收合所有節點
+ */
 const collapseAll = () => {
   treeData.value.forEach((node) => {
     node.expanded = false
   })
+}
+
+/**
+ * 處理選中的節點
+ * @param nodeId 節點id
+ */
+const handleNodeSelected = (nodeId: string) => {
+  isEditing.value = !isEditing.value
+  if (!isEditing.value) {
+    currentNodeId.value = nodeId
+    const selectedNode = treeData.value.find((node) => node.id === nodeId)
+    if (selectedNode) emit('node-click', selectedNode)
+  }
 }
 </script>
 

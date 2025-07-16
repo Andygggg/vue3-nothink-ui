@@ -15,8 +15,10 @@ export interface TreeNodeData {
   hasChildren: boolean // 由父組件計算並傳入
   isParent: boolean // 新增：是否為資料夾
   isEditTree: boolean
+  isEditing: boolean
   hover: boolean
   stripe: boolean
+  currentNodeId: string | null
 }
 
 export interface TreeData {
