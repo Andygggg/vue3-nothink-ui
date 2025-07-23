@@ -51,8 +51,11 @@
           :is-edit-tree="props.isEditTree"
           :is-editing="isEditing"
           :current-node-id="currentNodeId"
+          :checked-nodes="currentCheckedNodes"
           :hover="props.hover"
           :stripe="props.stripe"
+          :show-checkbox="props.showCheckbox"
+          :show-level-line="props.showLevelLine"
           @drag-start="handleDragStart"
           @drag-over="handleDragOver"
           @drop="handleDrop"
@@ -64,6 +67,7 @@
           @delete="handleDelete"
           @node-update="handleNodeUpdate"
           @node-selected="handleNodeSelected"
+          @node-checked="handleNodeChecked"
         >
           <template v-for="(_, slotName) in slots" #[slotName]="slotData">
             <slot :name="slotName" v-bind="slotData"></slot>
@@ -94,11 +98,14 @@ const props = withDefaults(defineProps<TreeData>(), {
   isEditTree: false,
   hover: false,
   stripe: false,
+  showCheckbox: false,
+  showLevelLine: false,
 })
 
 const emit = defineEmits<{
   (e: 'update:data', data: FlatTreeNode[]): void
   (e: 'node-click', node: FlatTreeNode): void
+  (e: 'node-check', checkedNodes: string[]): void
   (e: 'drag-start', data: DragStartData): void
   (e: 'drag-end', data: DragEndData): void
   (e: 'drop', sourceData: DragEndData, targetData: DropData & { dropPosition: string }): void
@@ -109,6 +116,7 @@ const slots = useSlots()
 const treeData = ref<FlatTreeNode[]>([...props.data]) //樹狀列表資料
 const isEditing = ref(false)
 const currentNodeId: Ref<string | null> = ref(null) //當前節點id
+const currentCheckedNodes: Ref<string[]> = ref([]) //當前選中的節點
 // 拖曳狀態
 const dragData: Ref<{
   node: FlatTreeNode | null
@@ -593,6 +601,18 @@ const handleNodeSelected = (nodeId: string) => {
     if (selectedNode) emit('node-click', selectedNode)
   }
 }
+
+const handleNodeChecked = (node: FlatTreeNode) => {
+  const index = currentCheckedNodes.value.findIndex((id) => id === node.id)
+  if (index !== -1) {
+    // 已存在，移除
+    currentCheckedNodes.value.splice(index, 1)
+  } else {
+    // 不存在，加入
+    currentCheckedNodes.value.push(node.id)
+  }
+  emit('node-check', currentCheckedNodes.value)
+}
 </script>
 
 <style lang="scss" scoped>
@@ -601,6 +621,7 @@ const handleNodeSelected = (nodeId: string) => {
   --nt-drag-line: linear-gradient(90deg, #007bff, #0056b3);
   --nt-drag-line-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
   --nt-drag-dot: #007bff;
+  --nt-tool-icon: #303030;
 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--nt-tree-bg);
@@ -625,9 +646,8 @@ const handleNodeSelected = (nodeId: string) => {
 
   > .btn {
     background: none;
-    color: #707070;
-    border: 1px solid transparent;
-    border-radius: 4px;
+    color: var(--nt-tool-icon);
+    border: none;
     padding: 4px 6px;
     font-size: 12px;
     cursor: pointer;

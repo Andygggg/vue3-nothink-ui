@@ -10,7 +10,10 @@
         <nt-tree
           v-model:data="flatTreeData"
           isEditTree
+          show-checkbox
+          stripe
           @node-click="handleNodeClick"
+          @node-check="handleNodeCheck"
           @drag-start="handleDragStart"
           @drop="handleDrop"
           @update:data="handleStatus"
@@ -189,6 +192,10 @@ const addLog = (type: string, message: string) => {
 const handleNodeClick = (node: FlatTreeNode) => {
   addLog('點擊', `點擊了 ${node.label}`)
   // console.log('點擊', node)
+}
+const handleNodeCheck = (checkedNodes: string[]) => {
+  addLog('勾選', `勾選了`)
+  console.log('勾選', checkedNodes)
 }
 
 const handleDragStart = (data: any) => {

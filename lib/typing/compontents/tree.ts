@@ -18,7 +18,10 @@ export interface TreeNodeData {
   isEditing: boolean
   hover: boolean
   stripe: boolean
+  showCheckbox: boolean
+  showLevelLine: boolean
   currentNodeId: string | null
+  checkedNodes: string[]
 }
 
 export interface TreeData {
@@ -26,6 +29,8 @@ export interface TreeData {
   isEditTree?: boolean
   hover?: boolean
   stripe?: boolean
+  showCheckbox?: boolean
+  showLevelLine?: boolean
 }
 
 export interface DragStartData {

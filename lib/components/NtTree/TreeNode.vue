@@ -4,7 +4,7 @@
       class="node_row"
       :class="treeNodeClass"
       :style="{
-        paddingLeft: `${props.node.level * 20 + 16}px`,
+        paddingLeft: `${props.node.level * 20 + 5}px`,
         cursor: props.isEditTree ? 'move' : 'default',
       }"
       :draggable="props.isEditTree"
@@ -15,8 +15,8 @@
       @dragend="onDragEnd"
       @click="onNodeClick"
     >
-      <div class="tree_line">
-        <!-- 層級線 -->
+      <!-- 層級線 -->
+      <div class="tree_line" v-if="props.showLevelLine">
         <div
           v-for="level in props.node.level"
           :key="`v-line-${level}`"
@@ -36,6 +36,27 @@
           </svg>
         </span>
       </button>
+
+      <label class="tree_checkbox" :for="'checkbox' + props.node.id" v-if="props.showCheckbox">
+        <input
+          type="checkbox"
+          :id="'checkbox' + props.node.id"
+          :checked="isCheckedNode"
+          @change="onNodeCheck"
+        />
+        <span class="checkbox_icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 512 512"
+          >
+            <path
+              d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69L432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"
+              fill="currentColor"
+            ></path>
+          </svg>
+        </span>
+      </label>
 
       <!-- 節點標題 -->
       <div
@@ -147,6 +168,7 @@ const emit = defineEmits<{
   (e: 'delete', node: TreeNode): void
   (e: 'node-update', data: { node: TreeNode; newLabel: string }): void
   (e: 'node-selected', label: string | null): void
+  (e: 'node-checked', node: TreeNode): void
 }>()
 
 defineSlots<{
@@ -166,6 +188,10 @@ const hasChildren = computed(() => props.hasChildren) //是否顯示展開icon
 const isEditNode = computed(() => {
   return props.currentNodeId === props.node.id && props.isEditing
 })
+const isCheckedNode = computed(() => {
+  const hasNode = props.checkedNodes.find((nodeId) => nodeId === props.node.id)
+  return hasNode ? true : false
+})
 
 //tree node class
 const treeNodeClass = computed(() => ({
@@ -173,7 +199,7 @@ const treeNodeClass = computed(() => ({
   'nt_tree_node--dragover': isDragOver.value,
   nt_tree_folder: props.isParent,
   'nt_tree_node--hover': props.hover,
-  'nt_tree_node--stripe': props.stripe,
+  'nt_tree_node--stripe': props.stripe && !props.node.parentId && props.node.order !== 1,
 }))
 
 //判斷是否為新增節點直接開啟inpit
@@ -305,6 +331,13 @@ const onDelete = (): void => {
   emit('delete', props.node)
 }
 
+/**
+ * 勾選節點
+ */
+const onNodeCheck = (): void => {
+  emit('node-checked', props.node)
+}
+
 //=================================標題=================================
 
 /**
@@ -346,7 +379,7 @@ const cancelEdit = () => {
   --nt-toggle-btn: #a3a3a3;
   --nt-toggle-btn-hover: #666;
   --nt-tree-text: #333;
-  --nt-tree-stripe: 1px solid #e0e0e0;
+  --nt-tree-stripe: 1px solid #d9d9d9;
   --nt-tree-selected-text: #007bff;
   --nt-tree-selected-bg: transparent;
 
@@ -367,7 +400,7 @@ const cancelEdit = () => {
   position: relative;
 
   &.nt_tree_node--stripe {
-    border-bottom: var(--nt-tree-stripe);
+    border-top: var(--nt-tree-stripe);
   }
 
   &:hover {
@@ -447,6 +480,99 @@ const cancelEdit = () => {
       width: 100%;
       height: 100%;
       display: block;
+    }
+  }
+}
+
+.tree_checkbox {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  margin-right: 5px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; // 防止按鈕被壓縮
+  position: relative;
+  transition: all 0.2s ease;
+
+  // input 樣式
+  input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+
+    // 選中狀態的樣式
+    &:checked ~ .checkbox_icon {
+      border: none;
+      background-color: #4a9eff;
+
+      svg {
+        color: white;
+      }
+    }
+
+    // hover 效果
+    &:hover ~ .checkbox_icon {
+      background-color: #ddd;
+    }
+
+    &:checked:hover ~ .checkbox_icon {
+      background-color: #4a9eff;
+    }
+  }
+
+  // checkbox 圖標容器
+  .checkbox_icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 20px;
+    width: 20px;
+    border: 2px solid #cfcfcf;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+
+    // SVG 圖標樣式
+    svg {
+      width: 12px;
+      height: 12px;
+      color: transparent;
+      transition: color 0.3s;
+    }
+  }
+
+  // 整個 label 的 hover 效果
+  &:hover {
+    .checkbox_icon {
+      background-color: #ddd;
+    }
+
+    input:checked ~ .checkbox_icon {
+      background-color: #4a9eff;
+    }
+  }
+
+  // 禁用狀態（如果需要）
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+
+    input {
+      cursor: not-allowed;
+    }
+
+    .checkbox_icon {
+      background-color: #f5f5f5;
     }
   }
 }
