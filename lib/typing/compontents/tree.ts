@@ -31,6 +31,7 @@ export interface TreeData {
   stripe?: boolean
   showCheckbox?: boolean
   showLevelLine?: boolean
+  checkedNodes?: string[]
 }
 
 export interface DragStartData {

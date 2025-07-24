@@ -109,7 +109,8 @@ const props = withDefaults(defineProps<TreeData>(), {
 const emit = defineEmits<{
   (e: 'update:data', data: FlatTreeNode[]): void
   (e: 'node-click', node: FlatTreeNode): void
-  (e: 'node-check', checkedNodes: string[]): void
+  (e: 'node-check', node: FlatTreeNode): void
+  (e: 'update:checked-nodes', checkedNodes: string[]): void
   (e: 'drag-start', data: DragStartData): void
   (e: 'drag-end', data: DragEndData): void
   (e: 'drop', sourceData: DragEndData, targetData: DropData & { dropPosition: string }): void
@@ -120,7 +121,7 @@ const slots = useSlots()
 const treeData = ref<FlatTreeNode[]>([...props.data]) //樹狀列表資料
 const isEditing = ref(false)
 const currentNodeId: Ref<string | null> = ref(null) //當前節點id
-const currentCheckedNodes: Ref<string[]> = ref([]) //當前選中的節點
+const currentCheckedNodes: Ref<string[]> = ref(props.checkedNodes ? [...props.checkedNodes] : []) //當前選中的節點
 // 拖曳狀態
 const dragData: Ref<{
   node: FlatTreeNode | null
@@ -615,7 +616,8 @@ const handleNodeChecked = (node: FlatTreeNode) => {
     // 不存在，加入
     currentCheckedNodes.value.push(node.id)
   }
-  emit('node-check', currentCheckedNodes.value)
+  emit('node-check', node)
+  emit('update:checked-nodes', currentCheckedNodes.value)
 }
 </script>
 

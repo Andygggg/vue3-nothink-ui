@@ -9,9 +9,11 @@
       <div class="tree-wrapper">
         <nt-tree
           v-model:data="flatTreeData"
+          v-model:checked-nodes="currentCheckedNodes"
           isEditTree
           show-checkbox
           stripe
+          hover
           @node-click="handleNodeClick"
           @node-check="handleNodeCheck"
           @drag-start="handleDragStart"
@@ -29,7 +31,7 @@
       <div class="sidebar">
         <!-- 事件日誌 -->
         <div class="event-log">
-          <h3>事件</h3>
+          <h3>事件{{ currentCheckedNodes }}</h3>
           <div class="log-content">
             <div
               v-for="(log, index) in eventLogs"
@@ -49,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import NtTree from '@lib/components/NtTree/NtTree.vue'
 
 import type { TreeNode as FlatTreeNode } from '@lib/typing'
@@ -173,6 +175,7 @@ const flatTreeData = ref<FlatTreeNode[]>([
   // 特殊節點（用於展示自定義插槽）
   { id: 'special', label: '特殊功能節點', parentId: '1-1', level: 2, order: 4, type: 'children' },
 ])
+const currentCheckedNodes: Ref<string[]> = ref([]) //當前選中的節點
 
 // 事件日誌
 const eventLogs = ref<Array<{ time: string; type: string; message: string }>>([])
@@ -193,9 +196,8 @@ const handleNodeClick = (node: FlatTreeNode) => {
   addLog('點擊', `點擊了 ${node.label}`)
   // console.log('點擊', node)
 }
-const handleNodeCheck = (checkedNodes: string[]) => {
-  addLog('勾選', `勾選了`)
-  console.log('勾選', checkedNodes)
+const handleNodeCheck = (node: FlatTreeNode) => {
+  addLog('勾選', `勾選了 ${node}`)
 }
 
 const handleDragStart = (data: any) => {

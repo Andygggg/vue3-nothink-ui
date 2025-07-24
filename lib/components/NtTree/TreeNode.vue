@@ -59,11 +59,7 @@
       </label>
 
       <!-- 節點標題 -->
-      <div
-        class="tree_label"
-        :class="{ selected: props.currentNodeId === props.node.id }"
-        @dblclick="editNodeLabel(props.node.id)"
-      >
+      <div class="tree_label" @dblclick="editNodeLabel(props.node.id)">
         <div class="edit_input" v-if="isEditNode">
           <input
             :id="'input' + props.node.id"
@@ -72,7 +68,6 @@
             v-model="editingLabel"
             @keyup.enter="saveLabel"
             @keyup.escape="cancelEdit"
-            @blur="cancelEdit"
           />
           <button class="action_btn check" title="確認" @click="saveLabel">
             <svg
@@ -372,7 +367,7 @@ const cancelEdit = () => {
 
 <style lang="scss" scoped>
 .tree_node_row {
-  --nt-node-hover: #e8f4fd;
+  --nt-node-hover: rgba(232, 244, 253, 0.6);
   --nt-draging-bg: #e3f2fd;
   --nt-dragover-border: 2px dashed #007bff;
   --nt-tree-line: #d0d0d0;
@@ -380,8 +375,6 @@ const cancelEdit = () => {
   --nt-toggle-btn-hover: #666;
   --nt-tree-text: #333;
   --nt-tree-stripe: 1px solid #d9d9d9;
-  --nt-tree-selected-text: #007bff;
-  --nt-tree-selected-bg: transparent;
 
   width: 100%;
   height: auto;
@@ -582,11 +575,6 @@ const cancelEdit = () => {
   color: var(--nt-tree-text);
   user-select: none;
   flex: 1;
-
-  &.selected {
-    color: var(--nt-tree-selected-text);
-    background: var(--nt-tree-selected-bg);
-  }
 
   > .edit_input {
     width: 100%;
