@@ -982,7 +982,7 @@ defineExpose({
   &.nt_table--medium {
     th,
     td {
-      padding: 9px 12px;
+      padding: 12px 16px;
       font-size: 15px;
     }
   }
@@ -990,7 +990,7 @@ defineExpose({
   &.nt_table--large {
     th,
     td {
-      padding: 12px 16px;
+      padding: 18px 16px;
       font-size: 16px;
     }
   }
