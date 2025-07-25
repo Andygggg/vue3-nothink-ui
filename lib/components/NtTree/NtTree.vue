@@ -3,46 +3,49 @@
     <div class="tree_list">
       <!-- tree list操作bar -->
       <div class="tree_tool_bar">
-        <button class="btn" title="新增父節點" @click="addRootParent">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 20 20"
-          >
-            <g fill="none">
+        <input type="text" id="test" />
+        <div class="btn_group">
+          <button class="btn" title="新增父節點" @click="addRootParent">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 20 20"
+            >
+              <g fill="none">
+                <path
+                  d="M9.386 4.29l-1.32-.99a1.5 1.5 0 0 0-.9-.3H4.5A2.5 2.5 0 0 0 2 5.5v1h5.07a.5.5 0 0 0 .363-.156L9.386 4.29zm1.179.21L8.158 7.033a1.5 1.5 0 0 1-1.087.467H2v7A2.5 2.5 0 0 0 4.5 17h5.1a5.5 5.5 0 0 1 8.4-6.743V7l-.005-.164A2.5 2.5 0 0 0 15.5 4.5h-4.935zM19 14.5a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0zm-4-2a.5.5 0 0 0-1 0V14h-1.5a.5.5 0 0 0 0 1H14v1.5a.5.5 0 0 0 1 0V15h1.5a.5.5 0 0 0 0-1H15v-1.5z"
+                  fill="currentColor"
+                ></path>
+              </g>
+            </svg>
+          </button>
+          <button class="btn" title="新增子節點" @click="addRootChildren">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 1024 1024"
+            >
               <path
-                d="M9.386 4.29l-1.32-.99a1.5 1.5 0 0 0-.9-.3H4.5A2.5 2.5 0 0 0 2 5.5v1h5.07a.5.5 0 0 0 .363-.156L9.386 4.29zm1.179.21L8.158 7.033a1.5 1.5 0 0 1-1.087.467H2v7A2.5 2.5 0 0 0 4.5 17h5.1a5.5 5.5 0 0 1 8.4-6.743V7l-.005-.164A2.5 2.5 0 0 0 15.5 4.5h-4.935zM19 14.5a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0zm-4-2a.5.5 0 0 0-1 0V14h-1.5a.5.5 0 0 0 0 1H14v1.5a.5.5 0 0 0 1 0V15h1.5a.5.5 0 0 0 0-1H15v-1.5z"
+                d="M480 580H372a8 8 0 0 0-8 8v48a8 8 0 0 0 8 8h108v108a8 8 0 0 0 8 8h48a8 8 0 0 0 8-8V644h108a8 8 0 0 0 8-8v-48a8 8 0 0 0-8-8H544V472a8 8 0 0 0-8-8h-48a8 8 0 0 0-8 8v108zm374.6-291.3c6 6 9.4 14.1 9.4 22.6V928c0 17.7-14.3 32-32 32H192c-17.7 0-32-14.3-32-32V96c0-17.7 14.3-32 32-32h424.7c8.5 0 16.7 3.4 22.7 9.4l215.2 215.3zM790.2 326L602 137.8V326h188.2z"
                 fill="currentColor"
               ></path>
-            </g>
-          </svg>
-        </button>
-        <button class="btn" title="新增子節點" @click="addRootChildren">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 1024 1024"
-          >
-            <path
-              d="M480 580H372a8 8 0 0 0-8 8v48a8 8 0 0 0 8 8h108v108a8 8 0 0 0 8 8h48a8 8 0 0 0 8-8V644h108a8 8 0 0 0 8-8v-48a8 8 0 0 0-8-8H544V472a8 8 0 0 0-8-8h-48a8 8 0 0 0-8 8v108zm374.6-291.3c6 6 9.4 14.1 9.4 22.6V928c0 17.7-14.3 32-32 32H192c-17.7 0-32-14.3-32-32V96c0-17.7 14.3-32 32-32h424.7c8.5 0 16.7 3.4 22.7 9.4l215.2 215.3zM790.2 326L602 137.8V326h188.2z"
-              fill="currentColor"
-            ></path>
-          </svg>
-        </button>
-        <button class="btn" title="收合" @click="collapseAll">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 20 20"
-          >
-            <g fill="none">
-              <path
-                d="M16 5.268A2 2 0 0 1 17 7v6a4 4 0 0 1-4 4H7a2 2 0 0 1-1.732-1H13a3 3 0 0 0 3-3V5.268zM15 5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V5zm-3 4a.5.5 0 0 1-.5.5h-5a.5.5 0 1 1 0-1h5a.5.5 0 0 1 .5.5z"
-                fill="currentColor"
-              ></path>
-            </g>
-          </svg>
-        </button>
+            </svg>
+          </button>
+          <button class="btn" title="收合" @click="collapseAll">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 20 20"
+            >
+              <g fill="none">
+                <path
+                  d="M16 5.268A2 2 0 0 1 17 7v6a4 4 0 0 1-4 4H7a2 2 0 0 1-1.732-1H13a3 3 0 0 0 3-3V5.268zM15 5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V5zm-3 4a.5.5 0 0 1-.5.5h-5a.5.5 0 1 1 0-1h5a.5.5 0 0 1 .5.5z"
+                  fill="currentColor"
+                ></path>
+              </g>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- 樹狀節點 -->
@@ -86,7 +89,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, useSlots, type Ref } from 'vue'
+import { ref, reactive, computed, useSlots, type Ref, watch } from 'vue'
 
 import TreeNode from './TreeNode.vue'
 import type {
@@ -119,6 +122,26 @@ const emit = defineEmits<{
 const slots = useSlots()
 
 const treeData = ref<FlatTreeNode[]>([...props.data]) //樹狀列表資料
+
+// 或者使用 watch
+watch(
+  () => props.data,
+  (newVal, oldVal) => {
+    // 只有當數據真的增加時才檢查
+    if (newVal.length > (oldVal?.length || 0)) {
+      const oldIds = new Set((oldVal || []).map((item) => item.id))
+      const newItems = newVal.filter((item) => !oldIds.has(item.id))
+
+      // 只 log 新增的項目
+      newItems.forEach((item) => {
+        console.log('新增項目:', item)
+      })
+    }
+
+    treeData.value = newVal
+  },
+  { deep: true },
+)
 const isEditing = ref(false)
 const currentNodeId: Ref<string | null> = ref(null) //當前節點id
 const currentCheckedNodes: Ref<string[]> = ref(props.checkedNodes ? [...props.checkedNodes] : []) //當前選中的節點
@@ -643,35 +666,56 @@ const handleNodeChecked = (node: FlatTreeNode) => {
 }
 
 .tree_tool_bar {
-  padding: 6px 12px;
+  width: auto;
+  height: 30px;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
 
-  > .btn {
-    background: none;
-    color: var(--nt-tool-icon);
-    border: none;
-    padding: 4px 6px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    min-width: 28px;
-    height: 28px;
+  > input {
+    width: auto;
+    min-width: 120px;
+    max-width: 300px;
+    height: 100%;
+    border: 1px solid #d9d9d9;
+    border-radius: 0.375rem;
+  }
+
+  .btn_group {
     display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    border: 1px solid #e9e9e9;
+    border-radius: 0.375rem;
 
-    &:hover {
-      transform: scale(1.2);
-    }
-
-    svg {
-      width: 24px;
-      height: 24px;
+    > .btn {
+      background: none;
+      color: #7c70c5;
+      border: none;
+      border-left: 1px solid #e9e9e9;
+      font-size: 12px;
+      cursor: pointer;
       transition: all 0.2s ease;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        transform: scale(1.2);
+      }
+
+      svg {
+        width: 22px;
+        height: 22px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+      }
     }
   }
 }
