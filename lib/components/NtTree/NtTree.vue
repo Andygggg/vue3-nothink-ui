@@ -2,36 +2,38 @@
   <div class="tree_box">
     <div class="tree_list">
       <!-- tree list操作bar -->
-      <div class="tree_tool_bar">
+      <div class="tree_tool_bar" v-if="props.openToolbar">
         <input type="text" id="test" />
         <div class="btn_group">
-          <button class="btn" title="新增父節點" @click="addRootParent">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-              viewBox="0 0 20 20"
-            >
-              <g fill="none">
+          <template v-if="props.useEdit">
+            <button title="新增父節點" @click="addRootParent">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 20 20"
+              >
+                <g fill="none">
+                  <path
+                    d="M9.386 4.29l-1.32-.99a1.5 1.5 0 0 0-.9-.3H4.5A2.5 2.5 0 0 0 2 5.5v1h5.07a.5.5 0 0 0 .363-.156L9.386 4.29zm1.179.21L8.158 7.033a1.5 1.5 0 0 1-1.087.467H2v7A2.5 2.5 0 0 0 4.5 17h5.1a5.5 5.5 0 0 1 8.4-6.743V7l-.005-.164A2.5 2.5 0 0 0 15.5 4.5h-4.935zM19 14.5a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0zm-4-2a.5.5 0 0 0-1 0V14h-1.5a.5.5 0 0 0 0 1H14v1.5a.5.5 0 0 0 1 0V15h1.5a.5.5 0 0 0 0-1H15v-1.5z"
+                    fill="currentColor"
+                  ></path>
+                </g>
+              </svg>
+            </button>
+            <button title="新增子節點" @click="addRootChildren">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 1024 1024"
+              >
                 <path
-                  d="M9.386 4.29l-1.32-.99a1.5 1.5 0 0 0-.9-.3H4.5A2.5 2.5 0 0 0 2 5.5v1h5.07a.5.5 0 0 0 .363-.156L9.386 4.29zm1.179.21L8.158 7.033a1.5 1.5 0 0 1-1.087.467H2v7A2.5 2.5 0 0 0 4.5 17h5.1a5.5 5.5 0 0 1 8.4-6.743V7l-.005-.164A2.5 2.5 0 0 0 15.5 4.5h-4.935zM19 14.5a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0zm-4-2a.5.5 0 0 0-1 0V14h-1.5a.5.5 0 0 0 0 1H14v1.5a.5.5 0 0 0 1 0V15h1.5a.5.5 0 0 0 0-1H15v-1.5z"
+                  d="M480 580H372a8 8 0 0 0-8 8v48a8 8 0 0 0 8 8h108v108a8 8 0 0 0 8 8h48a8 8 0 0 0 8-8V644h108a8 8 0 0 0 8-8v-48a8 8 0 0 0-8-8H544V472a8 8 0 0 0-8-8h-48a8 8 0 0 0-8 8v108zm374.6-291.3c6 6 9.4 14.1 9.4 22.6V928c0 17.7-14.3 32-32 32H192c-17.7 0-32-14.3-32-32V96c0-17.7 14.3-32 32-32h424.7c8.5 0 16.7 3.4 22.7 9.4l215.2 215.3zM790.2 326L602 137.8V326h188.2z"
                   fill="currentColor"
                 ></path>
-              </g>
-            </svg>
-          </button>
-          <button class="btn" title="新增子節點" @click="addRootChildren">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-              viewBox="0 0 1024 1024"
-            >
-              <path
-                d="M480 580H372a8 8 0 0 0-8 8v48a8 8 0 0 0 8 8h108v108a8 8 0 0 0 8 8h48a8 8 0 0 0 8-8V644h108a8 8 0 0 0 8-8v-48a8 8 0 0 0-8-8H544V472a8 8 0 0 0-8-8h-48a8 8 0 0 0-8 8v108zm374.6-291.3c6 6 9.4 14.1 9.4 22.6V928c0 17.7-14.3 32-32 32H192c-17.7 0-32-14.3-32-32V96c0-17.7 14.3-32 32-32h424.7c8.5 0 16.7 3.4 22.7 9.4l215.2 215.3zM790.2 326L602 137.8V326h188.2z"
-                fill="currentColor"
-              ></path>
-            </svg>
-          </button>
-          <button class="btn" title="收合" @click="collapseAll">
+              </svg>
+            </button>
+          </template>
+          <button title="收合" @click="collapseAll">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -55,8 +57,9 @@
           :index="index"
           :has-children="hasChildren(node.id)"
           :is-parent="isParentNode(node)"
-          :is-edit-tree="props.isEditTree"
+          :use-edit-mode="props.useEdit"
           :is-editing="isEditing"
+          :is-draggable="props.useDraggable"
           :current-node-id="currentNodeId"
           :checked-nodes="currentCheckedNodes"
           :hover="props.hover"
@@ -70,13 +73,13 @@
           @toggle="toggleNode"
           @node-click="handleNodeClick"
           @add-parent="handleAddParent"
-          @add-childen="handleAddChildren"
+          @add-children="handleAddChildren"
           @delete="handleDelete"
           @node-update="handleNodeUpdate"
           @node-selected="handleNodeSelected"
           @node-checked="handleNodeChecked"
         >
-          <template v-for="(_, slotName) in slots" #[slotName]="slotData">
+          <template v-for="(_, slotName) in $slots" :key="slotName" #[slotName]="slotData">
             <slot :name="slotName" v-bind="slotData"></slot>
           </template>
         </TreeNode>
@@ -89,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, useSlots, type Ref, watch } from 'vue'
+import { ref, reactive, computed, type Ref, watch, onMounted } from 'vue'
 
 import TreeNode from './TreeNode.vue'
 import type {
@@ -102,11 +105,13 @@ import type {
 } from '@lib/typing'
 
 const props = withDefaults(defineProps<TreeData>(), {
-  isEditTree: false,
   hover: false,
   stripe: false,
   showCheckbox: false,
   showLevelLine: false,
+  openToolbar: false,
+  useDraggable: false,
+  useEdit: false,
 })
 
 const emit = defineEmits<{
@@ -119,29 +124,8 @@ const emit = defineEmits<{
   (e: 'drop', sourceData: DragEndData, targetData: DropData & { dropPosition: string }): void
 }>()
 
-const slots = useSlots()
-
 const treeData = ref<FlatTreeNode[]>([...props.data]) //樹狀列表資料
 
-// 或者使用 watch
-watch(
-  () => props.data,
-  (newVal, oldVal) => {
-    // 只有當數據真的增加時才檢查
-    if (newVal.length > (oldVal?.length || 0)) {
-      const oldIds = new Set((oldVal || []).map((item) => item.id))
-      const newItems = newVal.filter((item) => !oldIds.has(item.id))
-
-      // 只 log 新增的項目
-      newItems.forEach((item) => {
-        console.log('新增項目:', item)
-      })
-    }
-
-    treeData.value = newVal
-  },
-  { deep: true },
-)
 const isEditing = ref(false)
 const currentNodeId: Ref<string | null> = ref(null) //當前節點id
 const currentCheckedNodes: Ref<string[]> = ref(props.checkedNodes ? [...props.checkedNodes] : []) //當前選中的節點
@@ -222,6 +206,57 @@ const treeNodes = computed(() => {
   return newTreeData
 })
 
+onMounted(() => {
+  console.log('=== 檢查並處理 order 屬性 ===')
+  const needsOrder  = checkNodeOrder(treeData.value)
+  if (needsOrder ) generateOrderOptimized()
+  console.log('處理完成的資料:', needsOrder )
+})
+
+const checkNodeOrder = (data: FlatTreeNode[]) => {
+  return data.some((node) => !('order' in node) || node.order === undefined)
+}
+
+// 優化的 order 生成
+const generateOrderOptimized = () => {
+  const processNodesByParent = (parentId: string | null): void => {
+    const children = treeData.value.filter((node) => node.parentId === parentId)
+
+    if (children.length === 0) return
+
+    children.forEach((node, index) => {
+      // 只為沒有 order 的節點生成
+      if (!('order' in node) || node.order === undefined) {
+        node.order = index + 1
+        console.log(`生成 order: "${node.label}" -> ${index + 1}`)
+      }
+
+      // 遞歸處理子節點
+      processNodesByParent(node.id)
+    })
+  }
+
+  processNodesByParent(null)
+}
+
+watch(
+  () => props.data,
+  (newVal) => {
+    if (newVal.length - (treeData.value.length || 0) === 1) {
+      const oldIds = new Set((treeData.value || []).map((item) => item.id))
+      const newItems = newVal.find((item) => !oldIds.has(item.id))
+
+      if (!newItems) return
+      // console.log('新增項目:', newItems)
+      isEditing.value = true
+      currentNodeId.value = newItems.id
+    }
+
+    treeData.value = [...newVal]
+  },
+  { deep: true },
+)
+
 //=================================檢查=================================
 
 /**
@@ -237,7 +272,7 @@ const hasChildren = (nodeId: string): boolean => {
  * @param node
  */
 const isParentNode = (node: FlatTreeNode): boolean => {
-  return node.type === 'parent' || node.allowChildren === true || hasChildren(node.id)
+  return node.type === 'parent' || hasChildren(node.id)
 }
 
 /**
@@ -286,7 +321,7 @@ const updateChildrenLevel = (parentId: string, baseLevel: number): void => {
  */
 const handleDragStart = (data: DragStartData): void => {
   //1.判斷是否為編輯狀態
-  if (!props.isEditTree) return
+  if (!props.useDraggable) return
   //2.進入拖曳模式
   dragData.value = {
     node: data.node,
@@ -621,13 +656,16 @@ const collapseAll = () => {
  * 處理選中的節點
  * @param nodeId 節點id
  */
-const handleNodeSelected = (nodeId: string) => {
+const handleNodeSelected = (nodeId: string | null) => {
   isEditing.value = !isEditing.value
   if (!isEditing.value) {
     currentNodeId.value = nodeId
     const selectedNode = treeData.value.find((node) => node.id === nodeId)
     if (selectedNode) emit('node-click', selectedNode)
   }
+  currentNodeId.value = nodeId
+  const selectedNode = treeData.value.find((node) => node.id === nodeId)
+  if (selectedNode) emit('node-click', selectedNode)
 }
 
 const handleNodeChecked = (node: FlatTreeNode) => {
@@ -692,7 +730,7 @@ const handleNodeChecked = (node: FlatTreeNode) => {
     border: 1px solid #e9e9e9;
     border-radius: 0.375rem;
 
-    > .btn {
+    > button {
       background: none;
       color: #7c70c5;
       border: none;

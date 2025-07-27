@@ -6,7 +6,6 @@ export interface TreeNode {
   expanded?: boolean
   order?: number
   type?: 'parent' | 'children'
-  allowChildren?: boolean
 }
 
 export interface TreeNodeData {
@@ -14,8 +13,9 @@ export interface TreeNodeData {
   index: number
   hasChildren: boolean // 由父組件計算並傳入
   isParent: boolean // 新增：是否為資料夾
-  isEditTree: boolean
+  useEditMode: boolean
   isEditing: boolean
+  isDraggable: boolean
   hover: boolean
   stripe: boolean
   showCheckbox: boolean
@@ -26,12 +26,14 @@ export interface TreeNodeData {
 
 export interface TreeData {
   data: TreeNode[]
-  isEditTree?: boolean
   hover?: boolean
   stripe?: boolean
   showCheckbox?: boolean
   showLevelLine?: boolean
   checkedNodes?: string[]
+  openToolbar?: boolean
+  useDraggable?: boolean
+  useEdit?: boolean
 }
 
 export interface DragStartData {

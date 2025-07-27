@@ -24,7 +24,7 @@
                 </g>
               </svg>
             </button>
-            <button class="btn" title="新增子節點">
+            <button class="btn" title="新增子節點" @click="addChildrenNode">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -36,7 +36,7 @@
                 ></path>
               </svg>
             </button>
-            <button class="btn" title="收合">
+            <button class="btn" title="收合" @click="collapseAll">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -55,7 +55,6 @@
         <nt-tree
           v-model:data="filterTreeData"
           v-model:checked-nodes="currentCheckedNodes"
-          isEditTree
           show-checkbox
           stripe
           hover
@@ -72,31 +71,34 @@
         </nt-tree>
       </div>
 
-      <!-- 說明和事件日誌 -->
-      <div class="sidebar">
-        <!-- 事件日誌 -->
-        <div class="event-log">
-          <h3>事件{{ currentCheckedNodes }}</h3>
-          <div class="log-content">
-            <div
-              v-for="(log, index) in eventLogs"
-              :key="index"
-              class="log-item"
-              :class="`log-${log.type}`"
-            >
-              <span class="log-time">{{ log.time }}</span>
-              <span class="log-type">{{ log.type }}</span>
-              <span class="log-message">{{ log.message }}</span>
-            </div>
-          </div>
-        </div>
+      <div class="tree-wrapper">
+        <nt-tree
+          v-model:data="flatTreeDataV2"
+          v-model:checked-nodes="currentCheckedNodes"
+          use-draggable
+          use-edit
+          show-checkbox
+          open-toolbar
+          stripe
+          hover
+          @node-click="handleNodeClick"
+          @node-check="handleNodeCheck"
+          @drag-start="handleDragStart"
+          @drop="handleDrop"
+          @update:data="handleStatus"
+        >
+          <!-- 自定義節點內容插槽範例 -->
+          <template #tree_label="{ node }">
+            <span style="font-weight: bold; cursor: default">{{ node.label }}</span>
+          </template>
+        </nt-tree>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, type Ref, computed } from 'vue'
+import { ref, type Ref, computed, watch } from 'vue'
 import NtTree from '@lib/components/NtTree/NtTree.vue'
 
 import type { TreeNode as FlatTreeNode } from '@lib/typing'
@@ -220,86 +222,169 @@ const flatTreeData = ref<FlatTreeNode[]>([
   // 特殊節點（用於展示自定義插槽）
   { id: 'special', label: '特殊功能節點', parentId: '1-1', level: 2, order: 4, type: 'children' },
 ])
+
+const flatTreeDataV2 = ref<FlatTreeNode[]>([
+  // 第一層（根節點）
+  {
+    id: '1',
+    label: '我的專案',
+    parentId: null,
+    level: 0,
+    expanded: false,
+    type: 'parent',
+  },
+  {
+    id: '2',
+    label: '工作文件',
+    parentId: null,
+    level: 0,
+    expanded: false,
+    type: 'parent',
+  },
+  {
+    id: '3',
+    label: '資源庫',
+    parentId: null,
+    level: 0,
+    expanded: false,
+    type: 'parent',
+  },
+
+  // 第二層
+  {
+    id: '1-1',
+    label: '前端專案',
+    parentId: '1',
+    level: 1,
+    expanded: false,
+    type: 'parent',
+  },
+  {
+    id: '1-2',
+    label: '後端 API',
+    parentId: '1',
+    level: 1,
+    expanded: false,
+    type: 'parent',
+  },
+  {
+    id: '1-3',
+    label: '專案文檔',
+    parentId: '1',
+    level: 1,
+    expanded: false,
+    type: 'parent',
+  },
+  { id: '1-4', label: 'README.md', parentId: '1', level: 1, type: 'children' },
+
+  { id: '2-1', label: '季度報告.xlsx', parentId: '2', level: 1, type: 'children' },
+  {
+    id: '2-2',
+    label: '數據分析',
+    parentId: '2',
+    level: 1,
+    expanded: false,
+    type: 'parent',
+  },
+  { id: '2-3', label: '會議記錄.docx', parentId: '2', level: 1, type: 'children' },
+
+  {
+    id: '3-1',
+    label: '設計素材',
+    parentId: '3',
+    level: 1,
+    expanded: false,
+    type: 'parent',
+  },
+  { id: '3-2', label: '參考文檔', parentId: '3', level: 1, type: 'parent' },
+])
 const currentCheckedNodes: Ref<string[]> = ref([]) //當前選中的節點
 
-// 事件日誌
-const eventLogs = ref<Array<{ time: string; type: string; message: string }>>([])
-
 const searchKeyword = ref('')
-const filterTreeData = computed(() => {
-  if (!searchKeyword.value || searchKeyword.value.trim() === '') {
-    return flatTreeData.value
-  }
-
-  const matchedNodeIds: Set<string> = new Set()
-  const resultNodeIds = new Set()
-  flatTreeData.value.forEach((node) => {
-    if (node.label.toLowerCase().includes(searchKeyword.value)) {
-      matchedNodeIds.add(node.id)
+const filterTreeData = computed({
+  get() {
+    if (!searchKeyword.value || searchKeyword.value.trim() === '') {
+      return flatTreeData.value
     }
-  })
 
-  const matchParentNodes = (nodeId: string) => {
-    if (resultNodeIds.has(nodeId)) return
-
-    resultNodeIds.add(nodeId)
-
-    const currentNode = flatTreeData.value.find((node) => node.id === nodeId)
-    if (currentNode && currentNode.parentId) {
-      matchParentNodes(currentNode.parentId)
-    }
-  }
-
-  matchedNodeIds.forEach((nodeId) => {
-    matchParentNodes(nodeId)
-  })
-  return flatTreeData.value
-    .filter((node) => resultNodeIds.has(node.id))
-    .map((node) => {
-      const hasChildrenInResult = flatTreeData.value.some(
-        (child) => child.parentId === node.id && resultNodeIds.has(child.id),
-      )
-
-      return {
-        ...node,
-        expanded: hasChildrenInResult || node.expanded,
+    const matchedNodeIds: Set<string> = new Set()
+    const resultNodeIds = new Set()
+    flatTreeData.value.forEach((node) => {
+      if (node.label.toLowerCase().includes(searchKeyword.value)) {
+        matchedNodeIds.add(node.id)
       }
     })
+
+    const matchParentNodes = (nodeId: string) => {
+      if (resultNodeIds.has(nodeId)) return
+
+      resultNodeIds.add(nodeId)
+
+      const currentNode = flatTreeData.value.find((node) => node.id === nodeId)
+      if (currentNode && currentNode.parentId) {
+        matchParentNodes(currentNode.parentId)
+      }
+    }
+
+    matchedNodeIds.forEach((nodeId) => {
+      matchParentNodes(nodeId)
+    })
+    return flatTreeData.value
+      .filter((node) => resultNodeIds.has(node.id))
+      .map((node) => {
+        const hasChildrenInResult = flatTreeData.value.some(
+          (child) => child.parentId === node.id && resultNodeIds.has(child.id),
+        )
+
+        return {
+          ...node,
+          expanded: hasChildrenInResult || node.expanded,
+        }
+      })
+  },
+
+  set(newVal) {
+    flatTreeData.value = newVal
+  },
 })
 
-// 添加日誌
-const addLog = (type: string, message: string) => {
-  const time = new Date().toLocaleTimeString()
-  eventLogs.value.unshift({ time, type, message })
+watch(
+  () => flatTreeData.value,
+  (newVal) => {
+    console.log('parent', newVal)
+  },
+  { deep: true },
+)
 
-  // 保持最多 8 條日誌
-  if (eventLogs.value.length > 8) {
-    eventLogs.value = eventLogs.value.slice(0, 8)
-  }
-}
+watch(
+  () => flatTreeDataV2.value,
+  (newVal) => {
+    console.log('parent', newVal)
+  },
+  { deep: true },
+)
 
 // 事件處理器
 const handleNodeClick = (node: FlatTreeNode) => {
-  addLog('點擊', `點擊了 ${node.label}`)
-  // console.log('點擊', node)
+  console.log('點擊', `點擊了 ${node.label}`, node)
 }
 const handleNodeCheck = (node: FlatTreeNode) => {
-  addLog('勾選', `勾選了 ${node}`)
+  console.log('勾選', `勾選了 ${node}`)
 }
 
 const handleDragStart = (data: any) => {
-  addLog('開始拖曳', `開始拖曳 ${data.node.label}`)
+  console.log('開始拖曳', `開始拖曳 ${data.node.label}`)
 }
 
 const handleDrop = (sourceData: any, targetData: any) => {
   const position = targetData.dropPosition || 'after'
   const positionText =
     position === 'inside' ? '移入' : position === 'before' ? '移到前面' : '移到後面'
-  addLog('移入', `${sourceData.node.label} ${positionText} ${targetData.node.label}`)
+  console.log('移入', `${sourceData.node.label} ${positionText} ${targetData.node.label}`)
 }
 
 const handleStatus = (data: FlatTreeNode[]) => {
-  addLog('修改', `資料 ${data.length}`)
+  console.log('修改', `資料 ${data.length}`, data)
 }
 
 const addParentNode = () => {
@@ -314,6 +399,25 @@ const addParentNode = () => {
   }
 
   flatTreeData.value.push(newNode)
+}
+
+const addChildrenNode = () => {
+  const newNode = {
+    id: `root-children-${Date.now()}`,
+    label: `新根節點`,
+    parentId: null,
+    type: 'children' as const,
+    order: flatTreeData.value.filter((n) => n.parentId === null).length + 1,
+    level: 0,
+  }
+
+  flatTreeData.value.push(newNode)
+}
+
+const collapseAll = () => {
+  flatTreeData.value.forEach((node) => {
+    node.expanded = false
+  })
 }
 </script>
 
@@ -342,74 +446,6 @@ const addParentNode = () => {
 
     @media (max-width: 1024px) {
       grid-template-columns: 1fr;
-    }
-  }
-
-  .actions {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-    margin-bottom: 24px;
-    padding: 20px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 12px;
-    border: 1px solid #dee2e6;
-
-    .action-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-
-      h4 {
-        margin: 0 0 12px 0;
-        font-size: 14px;
-        color: #495057;
-        border-bottom: 2px solid #007bff;
-        padding-bottom: 4px;
-        font-weight: 600;
-      }
-
-      button {
-        padding: 10px 16px;
-        border: 1px solid #ced4da;
-        border-radius: 8px;
-        background: white;
-        color: #495057;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-size: 14px;
-        font-weight: 500;
-
-        &:hover {
-          background: #f8f9fa;
-          border-color: #007bff;
-          color: #007bff;
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px rgba(0, 123, 255, 0.1);
-        }
-
-        &:active {
-          transform: translateY(0);
-        }
-      }
-
-      label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 14px;
-        color: #495057;
-        cursor: pointer;
-
-        input {
-          margin: 0;
-        }
-
-        &:hover {
-          color: #007bff;
-        }
-      }
     }
   }
 
@@ -507,68 +543,6 @@ const addParentNode = () => {
           transition: all 0.2s ease;
           flex-shrink: 0;
         }
-      }
-    }
-  }
-
-  .sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .event-log {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
-
-    h3 {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      margin: 0;
-      padding: 16px 20px;
-      font-size: 16px;
-    }
-
-    .log-content {
-      max-height: 300px;
-      overflow-y: auto;
-      background: #fafafa;
-    }
-
-    .log-item {
-      padding: 12px 20px;
-      border-bottom: 1px solid #f0f0f0;
-      font-size: 13px;
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      .log-time {
-        color: #6b7280;
-        font-family: monospace;
-        margin-right: 8px;
-        font-size: 11px;
-      }
-
-      .log-type {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-weight: 500;
-        font-size: 11px;
-        margin-right: 8px;
-        text-transform: uppercase;
-        background: #fef3c7;
-        color: #d97706;
-      }
-
-      .log-message {
-        color: #374151;
-        font-weight: 500;
       }
     }
   }

@@ -511,7 +511,7 @@ const getCellClass = (col: TableColumn) => ({
  */
 const handleSort = (col: TableColumn) => {
   if (!isCheckSort(col.sortable)) return
-  sortManager.value.toggleSort(col.key)
+  sortManager.value.toggleSort(col.key, col.sortable)
 }
 
 const isCheckSort = (status: number | undefined) => {

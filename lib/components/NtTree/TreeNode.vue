@@ -5,9 +5,9 @@
       :class="treeNodeClass"
       :style="{
         paddingLeft: `${props.node.level * 20 + 5}px`,
-        cursor: props.isEditTree ? 'move' : 'default',
+        cursor: props.isDraggable ? 'move' : 'default',
       }"
-      :draggable="props.isEditTree"
+      :draggable="props.isDraggable"
       @dragstart="onDragStart"
       @dragover="onDragOver"
       @dragleave="onDragLeave"
@@ -68,6 +68,7 @@
             v-model="editingLabel"
             @keyup.enter="saveLabel"
             @keyup.escape="cancelEdit"
+            @blur="cancelEdit"
           />
           <button class="action_btn check" title="確認" @click="saveLabel">
             <svg
@@ -89,7 +90,7 @@
       </div>
 
       <!-- 操作工具列 -->
-      <div class="node_actions" v-if="!isDragging && props.isEditTree">
+      <div class="node_actions" v-if="props.useEditMode&&!isEditNode">
         <slot name="addFolderButton" :onAddParent="onAddParent" v-if="isParent">
           <button class="action_btn add_folder" @click="onAddParent" title="新增資料夾">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -149,6 +150,7 @@ import type { TreeNode, TreeNodeData } from '@lib/typing'
 
 const props = withDefaults(defineProps<TreeNodeData>(), {
   isEditing: false,
+  isDraggable: false,
 })
 
 const emit = defineEmits<{
@@ -159,7 +161,7 @@ const emit = defineEmits<{
   (e: 'toggle', nodeId: string): void
   (e: 'node-click', node: TreeNode): void
   (e: 'add-parent', parentNode: TreeNode): void
-  (e: 'add-childen', parentNode: TreeNode): void
+  (e: 'add-children', parentNode: TreeNode): void
   (e: 'delete', node: TreeNode): void
   (e: 'node-update', data: { node: TreeNode; newLabel: string }): void
   (e: 'node-selected', label: string | null): void
@@ -181,7 +183,7 @@ const editingLabel = ref('') //標題
 const hasChildren = computed(() => props.hasChildren) //是否顯示展開icon
 //編輯狀態判斷
 const isEditNode = computed(() => {
-  return props.currentNodeId === props.node.id && props.isEditing
+  return props.currentNodeId === props.node.id
 })
 const isCheckedNode = computed(() => {
   const hasNode = props.checkedNodes.find((nodeId) => nodeId === props.node.id)
@@ -197,7 +199,7 @@ const treeNodeClass = computed(() => ({
   'nt_tree_node--stripe': props.stripe && !props.node.parentId && props.node.order !== 1,
 }))
 
-//判斷是否為新增節點直接開啟inpit
+//判斷是否為新增節點直接開啟input
 watch(
   () => isEditNode.value,
   async (newVal) => {
@@ -222,7 +224,7 @@ watch(
  */
 const onDragStart = (event: DragEvent): void => {
   //1.判斷是否為編輯狀態
-  if (!props.isEditTree) return
+  if (!props.isDraggable) return
 
   //2.進入拖曳模式
   isDragging.value = true
@@ -316,7 +318,7 @@ const onAddParent = (): void => {
  * 新增子節點
  */
 const onAddChildren = (): void => {
-  emit('add-childen', props.node)
+  emit('add-children', props.node)
 }
 
 /**
@@ -339,6 +341,7 @@ const onNodeCheck = (): void => {
  * 編輯標題
  */
 const editNodeLabel = async (nodeId: string) => {
+  if(!props.useEditMode) return
   // 1.進入編輯模式，保存原始值
   emit('node-selected', nodeId) // 發出選中事件
   editingLabel.value = props.node.label
@@ -368,7 +371,7 @@ const cancelEdit = () => {
 <style lang="scss" scoped>
 .tree_node_row {
   --nt-node-hover: rgba(232, 244, 253, 0.6);
-  --nt-draging-bg: #e3f2fd;
+  --nt-dragging-bg: #e3f2fd;
   --nt-dragover-border: 2px dashed #007bff;
   --nt-tree-line: #d0d0d0;
   --nt-toggle-btn: #a3a3a3;
@@ -408,7 +411,7 @@ const cancelEdit = () => {
 
   &.nt_tree_node--dragging {
     opacity: 0.5;
-    background-color: var(--nt-draging-bg);
+    background-color: var(--nt-dragging-bg);
     transform: scale(0.98);
   }
 
@@ -643,11 +646,11 @@ const cancelEdit = () => {
   }
 
   &.add_folder {
-    color: #f7ac0a;
+    color: #665da1;
   }
 
   &.add_file {
-    color: #007bff;
+    color: #665da1;
   }
 
   &.delete {
