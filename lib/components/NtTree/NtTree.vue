@@ -678,11 +678,6 @@ const collapseAll = () => {
  */
 const handleNodeSelected = (nodeId: string | null) => {
   isEditing.value = !isEditing.value
-  if (!isEditing.value) {
-    currentNodeId.value = nodeId
-    const selectedNode = treeData.value.find((node) => node.id === nodeId)
-    if (selectedNode) emit('node-click', selectedNode)
-  }
   currentNodeId.value = nodeId
   const selectedNode = treeData.value.find((node) => node.id === nodeId)
   if (selectedNode) emit('node-click', selectedNode)
@@ -769,6 +764,10 @@ const handleNodeChecked = (node: FlatTreeNode) => {
       display: flex;
       align-items: center;
       justify-content: center;
+
+      &:first-child {
+        border-left: none;
+      }
 
       &:hover {
         transform: scale(1.2);

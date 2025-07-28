@@ -182,7 +182,7 @@ const editingLabel = ref('') //標題
 const hasChildren = computed(() => props.hasChildren) //是否顯示展開icon
 //編輯狀態判斷
 const isEditNode = computed(() => {
-  return props.currentNodeId === props.node.id
+  return props.useEditMode && props.currentNodeId === props.node.id
 })
 const isCheckedNode = computed(() => {
   const hasNode = props.checkedNodes.find((nodeId) => nodeId === props.node.id)
