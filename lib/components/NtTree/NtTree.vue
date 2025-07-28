@@ -78,7 +78,7 @@
           @node-selected="handleNodeSelected"
           @node-checked="handleNodeChecked"
         >
-          <template v-for="(_, slotName) in $slots" :key="slotName" #[slotName]="slotData">
+          <template v-for="slotName in slotNames" :key="slotName" #[slotName]="slotData">
             <slot :name="slotName" v-bind="slotData"></slot>
           </template>
         </TreeNode>
@@ -91,7 +91,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, type Ref, watch } from 'vue'
+import { ref, reactive, useSlots, computed, type Ref, watch } from 'vue'
+import type { Slots } from 'vue'
 
 import TreeNode from './TreeNode.vue'
 import type {
@@ -122,6 +123,8 @@ const emit = defineEmits<{
   (e: 'drag-end', data: DragEndData): void
   (e: 'drop', sourceData: DragEndData, targetData: DropData & { dropPosition: string }): void
 }>()
+
+const slots: Slots = useSlots()
 
 const treeData = ref<FlatTreeNode[]>([...props.data]) //樹狀列表資料
 
@@ -253,6 +256,8 @@ const treeNodes = computed(() => {
 
   return newTreeData
 })
+
+const slotNames = computed<string[]>(() => Object.keys(slots))
 
 watch(
   () => props.data,
