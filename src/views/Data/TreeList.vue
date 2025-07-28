@@ -56,6 +56,7 @@
           v-model:data="filterTreeData"
           v-model:checked-nodes="currentCheckedNodes"
           show-checkbox
+          show-level-line
           stripe
           hover
           @node-click="handleNodeClick"
@@ -87,10 +88,6 @@
           @drop="handleDrop"
           @update:data="handleStatus"
         >
-          <!-- 自定義節點內容插槽範例 -->
-          <template #tree_label="{ node }">
-            <span style="font-weight: bold; cursor: default">{{ node.label }}</span>
-          </template>
         </nt-tree>
       </div>
     </div>
@@ -98,7 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type Ref, computed, watch } from 'vue'
+import { ref, type Ref, computed, onMounted } from 'vue'
 import NtTree from '@lib/components/NtTree/NtTree.vue'
 
 import type { TreeNode as FlatTreeNode } from '@lib/typing'
@@ -348,21 +345,35 @@ const filterTreeData = computed({
   },
 })
 
-watch(
-  () => flatTreeData.value,
-  (newVal) => {
-    console.log('parent', newVal)
-  },
-  { deep: true },
-)
+onMounted(() => {
+  const needsOrder = checkNodeOrder(flatTreeDataV2.value)
+  if (needsOrder) generateOrderOptimized()
+})
 
-watch(
-  () => flatTreeDataV2.value,
-  (newVal) => {
-    console.log('parent', newVal)
-  },
-  { deep: true },
-)
+const checkNodeOrder = (data: FlatTreeNode[]) => {
+  return data.some((node) => !('order' in node) || node.order === undefined)
+}
+
+// 優化的 order 生成
+const generateOrderOptimized = () => {
+  const processNodesByParent = (parentId: string | null): void => {
+    const children = flatTreeDataV2.value.filter((node) => node.parentId === parentId)
+
+    if (children.length === 0) return
+
+    children.forEach((node, index) => {
+      // 只為沒有 order 的節點生成
+      if (!('order' in node) || node.order === undefined) {
+        node.order = index + 1
+      }
+
+      // 遞歸處理子節點
+      processNodesByParent(node.id)
+    })
+  }
+
+  processNodesByParent(null)
+}
 
 // 事件處理器
 const handleNodeClick = (node: FlatTreeNode) => {
@@ -427,122 +438,96 @@ const collapseAll = () => {
   margin: 0 auto;
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 
-  .header {
-    text-align: center;
-    margin-bottom: 30px;
+.header {
+  text-align: center;
+  margin-bottom: 30px;
 
-    h1 {
-      color: #333;
-      margin-bottom: 8px;
-      font-size: 28px;
+  h1 {
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 28px;
+  }
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tree-wrapper {
+  max-width: 320px;
+  max-height: 450px;
+  background: white;
+  border-radius: 12px;
+  padding: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+}
+
+.tree_bar {
+  width: 100%;
+  height: 30px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+
+  > input {
+    width: auto;
+    min-width: 120px;
+    max-width: 300px;
+    height: 100%;
+    border: 1px solid #d9d9d9;
+    border-radius: 0.375rem;
+    outline: none;
+
+    &:focus {
+      border: 1px solid #a297e9;
     }
   }
 
-  .content {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 24px;
-
-    @media (max-width: 1024px) {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .tree-wrapper {
-    max-width: 320px;
-    max-height: 450px;
-    background: white;
-    border-radius: 12px;
-    padding: 0.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    overflow: auto;
-    border: 1px solid #e5e7eb;
-
-    // 隱藏連接線的樣式
-    &.hide-lines :deep(.tree_lines) {
-      display: none;
-    }
-
-    // 虛線主題
-    &.theme-dashed :deep(.tree_lines) {
-      .vertical_line,
-      .horizontal_line {
-        background: repeating-linear-gradient(
-          to bottom,
-          #d0d0d0,
-          #d0d0d0 2px,
-          transparent 2px,
-          transparent 4px
-        );
-      }
-    }
-
-    // 粗線主題
-    &.theme-thick :deep(.tree_lines) {
-      .vertical_line {
-        width: 2px;
-        background-color: #999;
-      }
-
-      .horizontal_line {
-        height: 2px;
-        background-color: #999;
-      }
-    }
-  }
-
-  .tree_bar {
-    width: 100%;
-    height: 30px;
+  .btn_group {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    border: 1px solid #e9e9e9;
+    border-radius: 0.375rem;
 
-    > input {
-      width: auto;
-      min-width: 120px;
-      max-width: 300px;
-      height: 100%;
-      border: 1px solid #d9d9d9;
-      border-radius: 0.375rem;
-    }
-
-    .btn_group {
+    > .btn {
+      background: none;
+      color: #7c70c5;
+      border: none;
+      border-left: 1px solid #e9e9e9;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 30px;
+      height: 30px;
       display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
       align-items: center;
-      justify-content: flex-start;
-      border: 1px solid #e9e9e9;
-      border-radius: 0.375rem;
+      justify-content: center;
 
-      > .btn {
-        background: none;
-        color: #7c70c5;
-        border: none;
-        border-left: 1px solid #e9e9e9;
-        font-size: 12px;
-        cursor: pointer;
+      &:hover {
+        transform: scale(1.2);
+      }
+
+      svg {
+        width: 22px;
+        height: 22px;
         transition: all 0.2s ease;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        &:hover {
-          transform: scale(1.2);
-        }
-
-        svg {
-          width: 22px;
-          height: 22px;
-          transition: all 0.2s ease;
-          flex-shrink: 0;
-        }
+        flex-shrink: 0;
       }
     }
   }

@@ -90,7 +90,7 @@
       </div>
 
       <!-- 操作工具列 -->
-      <div class="node_actions" v-if="props.useEditMode&&!isEditNode">
+      <div class="node_actions" v-if="props.useEditMode && !isEditNode">
         <slot name="addFolderButton" :onAddParent="onAddParent" v-if="isParent">
           <button class="action_btn add_folder" @click="onAddParent" title="新增資料夾">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -149,7 +149,6 @@ import { ref, computed, nextTick, watch } from 'vue'
 import type { TreeNode, TreeNodeData } from '@lib/typing'
 
 const props = withDefaults(defineProps<TreeNodeData>(), {
-  isEditing: false,
   isDraggable: false,
 })
 
@@ -341,7 +340,7 @@ const onNodeCheck = (): void => {
  * 編輯標題
  */
 const editNodeLabel = async (nodeId: string) => {
-  if(!props.useEditMode) return
+  if (!props.useEditMode) return
   // 1.進入編輯模式，保存原始值
   emit('node-selected', nodeId) // 發出選中事件
   editingLabel.value = props.node.label
@@ -578,6 +577,9 @@ const cancelEdit = () => {
   color: var(--nt-tree-text);
   user-select: none;
   flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 
   > .edit_input {
     width: 100%;

@@ -359,7 +359,10 @@ export class TypeComparer<T> {
   private stringCompare<K extends keyof T>(a: T, b: T, key: K): number {
     const aVal = String(a[key] || '')
     const bVal = String(b[key] || '')
-    return aVal.localeCompare(bVal)
+    return aVal.localeCompare(bVal, undefined, {
+      numeric: true, // 數字自然排序
+      sensitivity: 'base', // 忽略大小寫和重音符號
+    })
   }
 
   private stringIgnoreCaseCompare<K extends keyof T>(a: T, b: T, key: K): number {

@@ -3,7 +3,7 @@
     <div class="tree_list">
       <!-- tree list操作bar -->
       <div class="tree_tool_bar" v-if="props.openToolbar">
-        <input type="text" id="test" />
+        <input type="text" id="tree_search_input" v-model="searchKeyword" />
         <div class="btn_group">
           <template v-if="props.useEdit">
             <button title="新增父節點" @click="addRootParent">
@@ -58,7 +58,6 @@
           :has-children="hasChildren(node.id)"
           :is-parent="isParentNode(node)"
           :use-edit-mode="props.useEdit"
-          :is-editing="isEditing"
           :is-draggable="props.useDraggable"
           :current-node-id="currentNodeId"
           :checked-nodes="currentCheckedNodes"
@@ -92,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, type Ref, watch, onMounted } from 'vue'
+import { ref, reactive, computed, type Ref, watch } from 'vue'
 
 import TreeNode from './TreeNode.vue'
 import type {
@@ -116,9 +115,9 @@ const props = withDefaults(defineProps<TreeData>(), {
 
 const emit = defineEmits<{
   (e: 'update:data', data: FlatTreeNode[]): void
+  (e: 'update:checked-nodes', checkedNodes: string[]): void
   (e: 'node-click', node: FlatTreeNode): void
   (e: 'node-check', node: FlatTreeNode): void
-  (e: 'update:checked-nodes', checkedNodes: string[]): void
   (e: 'drag-start', data: DragStartData): void
   (e: 'drag-end', data: DragEndData): void
   (e: 'drop', sourceData: DragEndData, targetData: DropData & { dropPosition: string }): void
@@ -151,13 +150,62 @@ const dragIndicator = reactive({
   },
 })
 
+const searchKeyword = ref('') //關鍵字
+//樹狀列表(篩選關鍵字)
+const filterTreeData = computed(() => {
+  //1.檢查是否有關鍵字
+  if (!searchKeyword.value || searchKeyword.value.trim() === '') {
+    return treeData.value
+  }
+
+  const matchedNodeIds: Set<string> = new Set() //符合關鍵的節點
+  const resultNodeIds = new Set() //符合關鍵字的節點及其父節點
+  //2.收集符合關鍵字的節點
+  treeData.value.forEach((node) => {
+    if (node.label.toLowerCase().includes(searchKeyword.value)) {
+      matchedNodeIds.add(node.id)
+    }
+  })
+
+  // 處理尋找符合關鍵字的節點之所有父層
+  const matchParentNodes = (nodeId: string) => {
+    if (resultNodeIds.has(nodeId)) return
+
+    resultNodeIds.add(nodeId)
+
+    const currentNode = treeData.value.find((node) => node.id === nodeId)
+    if (currentNode && currentNode.parentId) {
+      matchParentNodes(currentNode.parentId)
+    }
+  }
+
+  //3.收集符合關鍵字的節點及其父節點
+  matchedNodeIds.forEach((nodeId) => {
+    matchParentNodes(nodeId)
+  })
+
+  //4.返回結果
+  return treeData.value
+    .filter((node) => resultNodeIds.has(node.id))
+    .map((node) => {
+      const hasChildrenInResult = treeData.value.some(
+        (child) => child.parentId === node.id && resultNodeIds.has(child.id),
+      )
+
+      return {
+        ...node,
+        expanded: hasChildrenInResult || node.expanded,
+      }
+    })
+})
+
 // 樹狀列表（根據展開狀態計算可見節點）
 const treeNodes = computed(() => {
   // 1.tree list紀錄展開狀態
   const expandedMap = new Map<string, boolean>()
 
   //1-1 加入各節點展開狀態
-  treeData.value.forEach((node) => {
+  filterTreeData.value.forEach((node) => {
     expandedMap.set(node.id, node.expanded || false)
   })
 
@@ -168,7 +216,7 @@ const treeNodes = computed(() => {
     // 檢查所有父節點是否都展開
     let currentParentId = node.parentId
     while (currentParentId) {
-      const parentNode = treeData.value.find((n) => n.id === currentParentId)
+      const parentNode = filterTreeData.value.find((n) => n.id === currentParentId)
       if (!parentNode || !expandedMap.get(parentNode.id)) {
         return false
       }
@@ -183,7 +231,7 @@ const treeNodes = computed(() => {
   // 遞迴添加節點及其子節點
   const handleNodeStatus = (parentId: string | null, level: number) => {
     // 獲取當前層級的所有節點並排序
-    const formattedData = treeData.value
+    const formattedData = filterTreeData.value
       .filter((node) => node.parentId === parentId && node.level === level)
       .sort((a, b) => (a.order || 0) - (b.order || 0))
 
@@ -205,39 +253,6 @@ const treeNodes = computed(() => {
 
   return newTreeData
 })
-
-onMounted(() => {
-  console.log('=== 檢查並處理 order 屬性 ===')
-  const needsOrder  = checkNodeOrder(treeData.value)
-  if (needsOrder ) generateOrderOptimized()
-  console.log('處理完成的資料:', needsOrder )
-})
-
-const checkNodeOrder = (data: FlatTreeNode[]) => {
-  return data.some((node) => !('order' in node) || node.order === undefined)
-}
-
-// 優化的 order 生成
-const generateOrderOptimized = () => {
-  const processNodesByParent = (parentId: string | null): void => {
-    const children = treeData.value.filter((node) => node.parentId === parentId)
-
-    if (children.length === 0) return
-
-    children.forEach((node, index) => {
-      // 只為沒有 order 的節點生成
-      if (!('order' in node) || node.order === undefined) {
-        node.order = index + 1
-        console.log(`生成 order: "${node.label}" -> ${index + 1}`)
-      }
-
-      // 遞歸處理子節點
-      processNodesByParent(node.id)
-    })
-  }
-
-  processNodesByParent(null)
-}
 
 watch(
   () => props.data,
@@ -298,19 +313,6 @@ const isDescendant = (ancestorId: string, nodeId: string): boolean => {
     if (isDescendant(child.id, nodeId)) return true
   }
   return false
-}
-
-/**
- * 更新子節點層級
- * @param parentId 父節點id
- * @param baseLevel 層級
- */
-const updateChildrenLevel = (parentId: string, baseLevel: number): void => {
-  const children = getChildNodes(parentId)
-  children.forEach((child) => {
-    child.level = baseLevel + 1
-    updateChildrenLevel(child.id, child.level)
-  })
 }
 
 //=================================拖曳=================================
@@ -450,6 +452,19 @@ const handleDrop = (data: DropData): void => {
     sourceIndex: -1,
     dropPosition: null,
   }
+}
+
+/**
+ * 更新子節點層級
+ * @param parentId 父節點id
+ * @param baseLevel 層級
+ */
+const updateChildrenLevel = (parentId: string, baseLevel: number): void => {
+  const children = getChildNodes(parentId)
+  children.forEach((child) => {
+    child.level = baseLevel + 1
+    updateChildrenLevel(child.id, child.level)
+  })
 }
 
 /**
@@ -700,6 +715,7 @@ const handleNodeChecked = (node: FlatTreeNode) => {
 .tree_list {
   position: relative;
   min-height: 100px;
+  width: auto;
   background: var(--nt-tree-bg);
 }
 
@@ -719,6 +735,11 @@ const handleNodeChecked = (node: FlatTreeNode) => {
     height: 100%;
     border: 1px solid #d9d9d9;
     border-radius: 0.375rem;
+    outline: none;
+
+    &:focus {
+      border: 1px solid #a297e9;
+    }
   }
 
   .btn_group {
