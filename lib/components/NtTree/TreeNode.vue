@@ -384,7 +384,7 @@ const cancelEdit = () => {
 }
 
 .node_row {
-  padding: 12px 16px;
+  padding: 12px 0px 12px 16px;
   min-height: 48px;
   display: flex;
   flex-direction: row;

@@ -7,6 +7,7 @@
       hover
       stripe
       cellBorder
+      scroll-x
       @row-click="handleRowClick"
       @sort-change="handleSortChange"
       class="table_style"
@@ -92,12 +93,14 @@ const tableSetting = computed<TableSetting>(() => ({
       width: '15%',
       sortable: DataType.NUMBER,
       align: 'center' as const,
+      fixed: 'left',
     },
     {
       key: 'name',
       title: '姓名',
       width: '25%',
       sortable: DataType.AUTO,
+      fixed: 'left',
     },
     {
       key: 'email',
@@ -238,7 +241,7 @@ defineExpose({
 <style lang="scss" scoped>
 .noThink_ui_box {
   height: 100%;
-  width: 100%;
+  width: 300px;
   padding: 0.5rem 0.5rem;
 }
 

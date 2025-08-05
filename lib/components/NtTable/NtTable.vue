@@ -746,7 +746,7 @@ defineExpose({
   --nt-stripe-bg: #fafafa;
   --nt-hover-bg: #e8f4fd;
 
-  --nt-fixed-bg: #2a2a2a;
+  --nt-fixed-bg: #ffffff;
   --nt-fixed-shadow: rgba(0, 0, 0, 0.1);
 
   --nt-sort-btn-color: #000000;
@@ -876,14 +876,6 @@ defineExpose({
       position: sticky;
       z-index: 20;
       background: var(--nt-fixed-bg);
-
-      &.fixed-left {
-        box-shadow: 2px 0 4px var(--nt-fixed-shadow);
-      }
-
-      &.fixed-right {
-        box-shadow: -2px 0 4px var(--nt-fixed-shadow);
-      }
     }
   }
 
