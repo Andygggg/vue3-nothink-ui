@@ -47,7 +47,7 @@
       <!-- 自定義空狀態 -->
       <template #empty>
         <div class="custom-empty">
-          <p>😕 沒有找到任何用戶數據</p>
+          <p>無資料</p>
           <button @click="loadData" class="btn btn-primary">重新載入</button>
         </div>
       </template>
@@ -56,7 +56,7 @@
       <template #loading>
         <div class="custom-loading">
           <div class="loading-spinner"></div>
-          <p>正在載入用戶數據...</p>
+          <p>正在載入中...</p>
         </div>
       </template>
     </NtTable>
@@ -130,12 +130,20 @@ const tableSetting = computed<TableSetting>(() => ({
 
 // 生成測試數據
 const generateUserData = (count: number): UserData[] => {
-  return Array.from({ length: count }, (_, i) => ({
+  const data = Array.from({ length: count }, (_, i) => ({
     id: i + 1,
     name: `用戶 ${i + 1}`,
     email: `user${i + 1}@example.com`,
     phone: `09${String(i).padStart(8, '0')}`,
   }))
+
+  // Fisher–Yates 洗牌
+  for (let i = data.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[data[i], data[j]] = [data[j], data[i]]
+  }
+
+  return data
 }
 
 // 數據
@@ -241,7 +249,7 @@ defineExpose({
 <style lang="scss" scoped>
 .noThink_ui_box {
   height: 100%;
-  width: 300px;
+  width: 100%;
   padding: 0.5rem 0.5rem;
 }
 
