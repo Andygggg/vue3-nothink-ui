@@ -191,7 +191,6 @@ const initScrollbar = () => {
       ? document.getElementById(props.config.container)
       : props.config.container
   if (!scrollWrapRef.value) return
-  console.dir(scrollWrapRef.value)
 
   scrollLeft.value = scrollWrapRef.value.scrollLeft
   scrollTop.value = scrollWrapRef.value.scrollTop
@@ -327,5 +326,13 @@ const handleScrollbarMouseup = () => {
       background: var(--nt-scrollbar-thumb-hover);
     }
   }
+}
+
+// 禁用樣式 (拖拽滾動條時)
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 </style>

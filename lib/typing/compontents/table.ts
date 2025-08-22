@@ -9,16 +9,9 @@ export interface TableColumn {
   ellipsis?: boolean // 是否省略文字
 }
 
-export interface TableSetting {
+export interface TableProps<T = any> {
   header: TableColumn[] // 標題
   size?: 'small' | 'medium' | 'large' // 尺寸
-  maxHeight?: string | number // 最大高度
-  emptyText?: string // 空狀態文字
-  loading?: boolean // 載入狀態
-}
-
-export interface TableProps<T = any> {
-  tableSetting: TableSetting // 表格設定
   data: T[] // 資料 - 使用泛型 T
   stripe?: boolean // 條紋
   cellBorder?: boolean // 邊框
@@ -26,6 +19,9 @@ export interface TableProps<T = any> {
   scrollX?: boolean // 水平滾動
   scrollY?: boolean // 垂直滾動
   stickyHeader?: boolean // 表頭固定
+  maxHeight?: string | number // 最大高度
+  emptyText?: string // 空狀態文字
+  loading?: boolean // 載入狀態
 }
 
 export interface TableEditMethods {

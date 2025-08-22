@@ -96,7 +96,7 @@
 
 <script setup lang="ts">
 import { ref, type Ref, computed, onMounted } from 'vue'
-import NtTree from '@lib/components/NtTree/NtTree.vue'
+import NtTree from '@lib/components/Data/NtTree/NtTree.vue'
 
 import type { TreeNode as FlatTreeNode } from '@lib/typing'
 

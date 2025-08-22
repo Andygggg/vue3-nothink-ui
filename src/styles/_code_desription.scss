@@ -1,0 +1,94 @@
+.code_view_block {
+  --editor-background: #1e1e2e;
+  --html-tag: #f38ba8;
+  --html-attribute-name: #89b4fa;
+  --html-attribute-value: #a6e3a1;
+  --vue-directive: #f7be8f;
+  --js-keyword: #cba6f7;
+  --js-function: #89b4fa;
+  --js-string: #a6e3a1;
+  --js-number: #fab387;
+  --js-comment: #6c7086;
+  --ts-type: #f9e2af;
+  --text-default: #cdd6f4;
+  --punctuation: #bac2de;
+
+  width: 100%;
+  height: auto;
+  background: var(--editor-background);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+
+  > pre {
+    margin: 0;
+    color: #f8fafc;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+
+    > code {
+      display: block;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  }
+}
+
+/* HTML 標籤 */
+.html-tag {
+  color: var(--html-tag);
+}
+
+/* HTML 屬性名 */
+.html-attr-name {
+  color: var(--html-attribute-name);
+}
+
+/* HTML 屬性值 */
+.html-attr-value {
+  color: var(--html-attribute-value);
+}
+
+/* Vue 指令 */
+.vue-directive {
+  color: var(--vue-directive);
+}
+
+/* JavaScript 關鍵字 */
+.js-keyword {
+  color: var(--js-keyword);
+}
+
+/* JavaScript 函數 */
+.js-function {
+  color: var(--js-function);
+}
+
+/* 字串 */
+.js-string {
+  color: var(--js-string);
+}
+
+/* 數字 */
+.js-number {
+  color: var(--js-number);
+}
+
+/* 註解 */
+.js-comment {
+  color: var(--js-comment);
+}
+
+/* TypeScript 類型 */
+.ts-type {
+  color: var(--ts-type);
+}
+
+/* 標點符號 */
+.punctuation {
+  color: var(--punctuation);
+}
+
+/* 預設文字 */
+.text-default {
+  color: var(--text-default);
+}
