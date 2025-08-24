@@ -257,45 +257,6 @@ const getHeaderClass = (col: TableColumn) => ({
 })
 
 /**
- * 計算固定列的位置
- * @param col 列配置
- * @param colIndex 列在 columns 中的索引
- * @returns 返回固定列的 x 軸位置
- */
-const getFixedPosition = (col: TableColumn, colIndex: number) => {
-  if (!col.fixed) return 0
-
-  let position = 0
-  const columns = props.header
-
-  if (col.fixed === 'left') {
-    for (let i = 0; i < colIndex; i++) {
-      if (columns[i].fixed === 'left') {
-        const width = columns[i].width
-        if (width) {
-          position += typeof width === 'number' ? width : parseInt(width) || 0
-        } else {
-          position += 120
-        }
-      }
-    }
-  } else if (col.fixed === 'right') {
-    for (let i = colIndex + 1; i < columns.length; i++) {
-      if (columns[i].fixed === 'right') {
-        const width = columns[i].width
-        if (width) {
-          position += typeof width === 'number' ? width : parseInt(width) || 0
-        } else {
-          position += 120
-        }
-      }
-    }
-  }
-
-  return position
-}
-
-/**
  * 自訂列 class
  * @param col 列配置
  */
@@ -314,9 +275,7 @@ const getCellClass = (col: TableColumn) => ({
  */
 const getColumnStyle = (col: TableColumn, type: 'header' | 'cell' = 'cell') => {
   const style: any = {}
-  if (!props.header) return style
   if (!col || !col.key) return style
-  if (!props.header.length) return style
 
   const colIndex = props.header.findIndex((c) => c.key === col.key)
   if (colIndex === -1) return style
@@ -336,13 +295,35 @@ const getColumnStyle = (col: TableColumn, type: 'header' | 'cell' = 'cell') => {
 
     const position = getFixedPosition(col, colIndex)
     if (col.fixed === 'left') {
-      style.left = `${position}px`
+      style.left = position
     } else if (col.fixed === 'right') {
-      style.right = `${position}px`
+      style.right = position
     }
   }
 
   return style
+}
+
+/**
+ * 計算固定列的位置
+ * @param col 列配置
+ * @param colIndex 列在 columns 中的索引
+ * @returns 返回固定列的 x 軸位置
+ */
+const getFixedPosition = (col: TableColumn, colIndex: number) => {
+  if (!col.fixed || colIndex === 0) return '0'
+
+  let position = '0'
+  if (col.minWidth) {
+    position = typeof col.minWidth === 'number' ? `${col.minWidth}px` : col.minWidth
+    return position
+  }
+  if (col.width) {
+    position = typeof col.width === 'number' ? `${col.width}px` : col.width
+    return position
+  }
+
+  return `${position}px`
 }
 
 /**
@@ -352,8 +333,6 @@ const updateHeight = async () => {
   await nextTick()
 
   if (!tableWrapper.value) return
-  console.dir(tableWrapper.value)
-
   tableHeight.value = tableWrapper.value.clientHeight
 }
 
@@ -464,7 +443,7 @@ defineExpose({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .nt_table_box {
   position: relative;
   width: 100%;

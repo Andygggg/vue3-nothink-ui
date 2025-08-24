@@ -43,7 +43,7 @@ const props = withDefaults(
 )
 
 const scrollWrapRef = ref<HTMLElement | null>(null) // 滾動容器引用
-const scrollResizeObserver = ref<ResizeObserver | null>(null) // 用於監聽尺寸變化
+const scrollMutationObserver = ref<MutationObserver | null>(null)// 用於監聽變化
 // 滾動狀態
 const scrollLeft = ref(0)
 const scrollTop = ref(0)
@@ -165,19 +165,26 @@ onMounted(async () => {
   if (scrollWrapRef.value) {
     scrollWrapRef.value.addEventListener('scroll', handleScroll)
 
-    scrollResizeObserver.value = new ResizeObserver(() => {
+    scrollMutationObserver.value = new MutationObserver(() => {
       nextTick(() => {
+        console.log('MutationObserver triggered');
         initScrollbar()
       })
     })
-    scrollResizeObserver.value.observe(scrollWrapRef.value) // 監聽容器尺寸變化
+
+    scrollMutationObserver.value.observe(scrollWrapRef.value, {
+      childList: true,      // 監聽子節點的增減
+      subtree: true,        // 監聽後代節點
+      attributes: true,     // 監聽屬性變化
+      attributeFilter: ['style', 'class'], // 只監聽可能影響尺寸的屬性
+    })
   }
 })
 
 onUnmounted(() => {
   if (scrollWrapRef.value) {
     scrollWrapRef.value.removeEventListener('scroll', handleScroll)
-    scrollResizeObserver.value?.unobserve(scrollWrapRef.value)
+    scrollMutationObserver.value?.disconnect()
   }
 
   document.removeEventListener('mousemove', handleScrollbarMousemove)

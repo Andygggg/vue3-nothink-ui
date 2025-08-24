@@ -14,10 +14,25 @@
   --punctuation: #bac2de;
 
   width: 100%;
+  max-height: 450px;
   height: auto;
+  overflow-y: auto;
   background: var(--editor-background);
   border-radius: 8px;
   padding: 0.5rem 1rem;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background: #000000;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 15px;
+    background: rgb(124, 124, 124);
+  }
 
   > pre {
     margin: 0;

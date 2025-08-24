@@ -1,17 +1,17 @@
 <template>
-  <div class="vertical_scroll_content">
-    <h2>垂直滾動</h2>
-    <p>當資料超出表格的高度時，會自動抓取表格當下的最大高度並垂直滾動</p>
+  <div class="basic_content">
+    <h2>基礎表格</h2>
+    <p>以表格形式顯示資料</p>
 
-    <div class="vertical_scroll_table">
-      <NtTable :header="tableHeader" :data="largeData"> </NtTable>
+    <div class="basic_table">
+      <NtTable :header="tableHeader" :data="largeData" :loading="isLoading"> </NtTable>
     </div>
 
     <div class="code_view_block" @click="toggleOpen">
       <template v-if="isOpen">
         <pre><code><span class="html-tag">&lt;template&gt;</span>
   <span class="html-tag">&lt;div</span> <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"basic_table"</span><span class="html-tag">&gt;</span>
-    <span class="html-tag">&lt;NtTable</span> <span class="vue-directive">:header</span><span class="punctuation">=</span><span class="html-attr-value">"tableHeader"</span> <span class="vue-directive">:data</span><span class="punctuation">=</span><span class="html-attr-value">"largeData"</span><span class="html-tag">&gt;&lt;/NtTable&gt;</span>
+    <span class="html-tag">&lt;NtTable</span> <span class="vue-directive">:header</span><span class="punctuation">=</span><span class="html-attr-value">"tableHeader"</span> <span class="vue-directive">:data</span><span class="punctuation">=</span><span class="html-attr-value">"largeData"</span> <span class="vue-directive">:loading</span><span class="punctuation">=</span><span class="html-attr-value">"isLoading"</span><span class="html-tag">&gt;</span> <span class="html-tag">&lt;/NtTable&gt;</span>
   <span class="html-tag">&lt;/div&gt;</span>
 <span class="html-tag">&lt;/template&gt;</span>
 
@@ -42,12 +42,13 @@
   <span class="punctuation">},</span>
 <span class="punctuation">])</span>
 
-<span class="js-keyword">const</span> <span class="text-default">largeData</span> <span class="punctuation">=</span> <span class="js-function">ref</span><span class="punctuation">&lt;</span><span class="ts-type">UserData</span><span class="punctuation">[]&gt;(</span><span class="js-function">generateUserData</span><span class="punctuation">(</span><span class="js-number">15</span><span class="punctuation">))</span>
+<span class="js-keyword">const</span> <span class="text-default">isLoading</span> <span class="punctuation">=</span> <span class="js-function">ref</span><span class="punctuation">(</span><span class="js-function">true</span><span class="punctuation">)</span>
+<span class="js-keyword">const</span> <span class="text-default">largeData</span> <span class="punctuation">=</span> <span class="js-function">ref</span><span class="punctuation">&lt;</span><span class="ts-type">UserData</span><span class="punctuation">[]&gt;(</span><span class="js-function">generateUserData</span><span class="punctuation">(</span><span class="js-number">5</span><span class="punctuation">))</span>
 <span class="html-tag">&lt;/script&gt;</span></code></pre>
       </template>
       <template v-else>
         <pre><code>
-<span class="html-tag">&lt;NtTable</span> <span class="vue-directive">:header</span><span class="punctuation">=</span><span class="html-attr-value">"tableHeader"</span> <span class="vue-directive">:data</span><span class="punctuation">=</span><span class="html-attr-value">"largeData"</span><span class="html-tag">&gt;&lt;/NtTable&gt;</span>
+<span class="html-tag">&lt;NtTable</span> <span class="vue-directive">:header</span><span class="punctuation">=</span><span class="html-attr-value">"tableHeader"</span> <span class="vue-directive">:data</span><span class="punctuation">=</span><span class="html-attr-value">"largeData"</span> <span class="vue-directive">:loading</span><span class="punctuation">=</span><span class="html-attr-value">"isLoading"</span><span class="html-tag">&gt;</span> <span class="html-tag">&lt;/NtTable&gt;</span>
         </code></pre>
       </template>
     </div>
@@ -89,6 +90,7 @@ const tableHeader = ref([
     width: '20%',
   },
 ])
+const isLoading = ref(true)
 const isOpen = ref(false)
 
 // 生成測試數據
@@ -110,7 +112,7 @@ const generateUserData = (count: number): UserData[] => {
 }
 
 // 數據
-const largeData = ref<UserData[]>(generateUserData(15))
+const largeData = ref<UserData[]>(generateUserData(5))
 
 const toggleOpen = () => {
   isOpen.value = !isOpen.value
@@ -118,7 +120,7 @@ const toggleOpen = () => {
 </script>
 
 <style lang="scss" scoped>
-.vertical_scroll_content {
+.basic_content {
   width: 100%;
   height: auto;
   margin-top: 30px;
@@ -137,7 +139,7 @@ const toggleOpen = () => {
   }
 }
 
-.vertical_scroll_table {
+.basic_table {
   height: 300px;
   width: 100%;
   padding: 0.5rem;

@@ -2,7 +2,7 @@
   <div class="data_table_box">
     <div class="read_block">
       <h1>Nt-Table</h1>
-      <p>Nt-Table透過表個的形式呈現資料</p>
+      <p>Nt-Table透過表格的形式呈現資料</p>
       <component
         v-for="option in component_option"
         :key="option.id"
@@ -40,6 +40,10 @@ import VerticalScrollTable from '@/components/DataTable/VerticalScrollTable.vue'
 import StickyHeaderTable from '@/components/DataTable/StickyHeaderTable.vue'
 import HorizontalScrollTable from '@/components/DataTable/HorizontalScrollTable.vue'
 import FixedCellTable from '@/components/DataTable/FixedCellTable.vue'
+import EditTable from '@/components/DataTable/EditTable.vue'
+import LoadingTable from '@/components/DataTable/LoadingTable.vue'
+import EmptyTable from '@/components/DataTable/EmptyTable.vue'
+import SampleTable from '@/components/DataTable/SampleTable.vue'
 
 interface ComponentOption {
   id: string
@@ -55,12 +59,12 @@ const component_option = shallowRef<ComponentOption[]>([
   },
   {
     id: 'CustomTableTemplate',
-    name: '自訂模板表格',
+    name: '自訂內容',
     component: CustomTableTemplate,
   },
   {
     id: 'CustomTableSize',
-    name: '尺寸表格',
+    name: '自訂大小',
     component: CustomTableSize,
   },
   {
@@ -75,7 +79,7 @@ const component_option = shallowRef<ComponentOption[]>([
   },
   {
     id: 'CustomTableHover',
-    name: '懸停效果表格',
+    name: 'Hover效果',
     component: CustomTableHover,
   },
   {
@@ -85,23 +89,43 @@ const component_option = shallowRef<ComponentOption[]>([
   },
   {
     id: 'VerticalScrollTable',
-    name: '垂直滾動表格',
+    name: '垂直滾動',
     component: VerticalScrollTable,
   },
   {
     id: 'StickyHeaderTable',
-    name: '固定標題表格',
+    name: '固定表頭',
     component: StickyHeaderTable,
   },
   {
     id: 'HorizontalScrollTable',
-    name: '水平滾動表格',
+    name: '水平滾動',
     component: HorizontalScrollTable,
   },
   {
     id: 'FixedCellTable',
-    name: '固定欄位表格',
+    name: '固定列',
     component: FixedCellTable,
+  },
+  {
+    id: 'EditTable',
+    name: '單元格編輯',
+    component: EditTable,
+  },
+  {
+    id: 'LoadingTable',
+    name: '資料加載動畫',
+    component: LoadingTable,
+  },
+  {
+    id: 'EmptyTable',
+    name: '空資料',
+    component: EmptyTable,
+  },
+  {
+    id: 'SampleTable',
+    name: '範例',
+    component: SampleTable,
   },
 ])
 
@@ -112,7 +136,7 @@ const scrollToComponent = (componentId: string): void => {
   if (element) {
     element.scrollIntoView({
       behavior: 'smooth',
-      block: 'start',
+      block: 'end',
       inline: 'nearest',
     })
     currentSection.value = componentId
@@ -155,7 +179,7 @@ const scrollToComponent = (componentId: string): void => {
   width: 200px;
   height: auto;
   position: sticky;
-  top: 2rem;
+  top: 5rem;
   right: 0;
 
   > ul {

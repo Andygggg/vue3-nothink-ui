@@ -84,7 +84,7 @@
 
 <script setup lang="ts">
 import { ref, type Ref } from 'vue'
-import NtTable from '@lib/components/Data/NtTable.vue'
+import NtTable from '@lib/components/Data/NtTable/NtTable.vue'
 
 // 定義用戶數據類型
 interface UserData {

@@ -60,7 +60,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import NtTable from '@lib/components/Data/NtTable.vue'
+import NtTable from '@lib/components/Data/NtTable/NtTable.vue'
 import { DataType } from '@lib/typing'
 
 // 定義用戶數據類型

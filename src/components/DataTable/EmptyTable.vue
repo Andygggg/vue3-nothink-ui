@@ -1,9 +1,9 @@
 <template>
-  <div class="vertical_scroll_content">
-    <h2>垂直滾動</h2>
-    <p>當資料超出表格的高度時，會自動抓取表格當下的最大高度並垂直滾動</p>
+  <div class="basic_content">
+    <h2>空資料</h2>
+    <p>當表格資料為空值時，會出現對應的提示文字</p>
 
-    <div class="vertical_scroll_table">
+    <div class="basic_table">
       <NtTable :header="tableHeader" :data="largeData"> </NtTable>
     </div>
 
@@ -42,7 +42,7 @@
   <span class="punctuation">},</span>
 <span class="punctuation">])</span>
 
-<span class="js-keyword">const</span> <span class="text-default">largeData</span> <span class="punctuation">=</span> <span class="js-function">ref</span><span class="punctuation">&lt;</span><span class="ts-type">UserData</span><span class="punctuation">[]&gt;(</span><span class="js-function">generateUserData</span><span class="punctuation">(</span><span class="js-number">15</span><span class="punctuation">))</span>
+<span class="js-keyword">const</span> <span class="text-default">largeData</span> <span class="punctuation">=</span> <span class="js-function">ref</span><span class="punctuation">&lt;</span><span class="ts-type">UserData</span><span class="punctuation">[]&gt;(</span><span class="js-function">generateUserData</span><span class="punctuation">(</span><span class="js-number">0</span><span class="punctuation">))</span>
 <span class="html-tag">&lt;/script&gt;</span></code></pre>
       </template>
       <template v-else>
@@ -89,6 +89,7 @@ const tableHeader = ref([
     width: '20%',
   },
 ])
+
 const isOpen = ref(false)
 
 // 生成測試數據
@@ -110,7 +111,7 @@ const generateUserData = (count: number): UserData[] => {
 }
 
 // 數據
-const largeData = ref<UserData[]>(generateUserData(15))
+const largeData = ref<UserData[]>(generateUserData(0))
 
 const toggleOpen = () => {
   isOpen.value = !isOpen.value
@@ -118,7 +119,7 @@ const toggleOpen = () => {
 </script>
 
 <style lang="scss" scoped>
-.vertical_scroll_content {
+.basic_content {
   width: 100%;
   height: auto;
   margin-top: 30px;
@@ -137,7 +138,7 @@ const toggleOpen = () => {
   }
 }
 
-.vertical_scroll_table {
+.basic_table {
   height: 300px;
   width: 100%;
   padding: 0.5rem;
