@@ -2,7 +2,7 @@
   <div class="data_table_box">
     <div class="read_block">
       <h1>Nt-Table</h1>
-      <p>Nt-Table透過表格的形式呈現資料</p>
+      <p>Nt-Table透過表格的形式呈現資料，可對表格進行樣式、自訂義內容、資料排序及其他自訂義操作</p>
       <component
         v-for="option in component_option"
         :key="option.id"
@@ -64,12 +64,12 @@ const component_option = shallowRef<ComponentOption[]>([
   },
   {
     id: 'CustomTableSize',
-    name: '自訂大小',
+    name: '表格尺寸',
     component: CustomTableSize,
   },
   {
     id: 'CustomTableBorder',
-    name: '邊框表格',
+    name: '行間隔線',
     component: CustomTableBorder,
   },
   {
@@ -170,8 +170,8 @@ const scrollToComponent = (componentId: string): void => {
 
   > p {
     color: #334155;
-    font-size: 17px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 500;
   }
 }
 

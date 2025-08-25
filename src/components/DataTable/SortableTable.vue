@@ -1,7 +1,7 @@
 <template>
   <div class="sort_table_content">
     <h2>資料排序</h2>
-    <p>透過加入sortable可對列進行排序</p>
+    <p>可以透header屬性的物件配置sortable屬性，為該行資料添加資料排序功能</p>
 
     <div class="sort_table">
       <NtTable :header="tableHeader" :data="largeData"> </NtTable>
@@ -10,49 +10,49 @@
     <div class="code_view_block" @click="toggleOpen">
       <template v-if="isOpen">
         <pre><code>
-<span class="html-tag">&lt;template&gt;</span>
- <span class="html-tag">&lt;div</span> <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"sort_table"</span><span class="html-tag">&gt;</span>
-   <span class="html-tag">&lt;NtTable</span> <span class="vue-directive">:header</span><span class="punctuation">=</span><span class="html-attr-value">"tableHeader"</span> <span class="vue-directive">:data</span><span class="punctuation">=</span><span class="html-attr-value">"largeData"</span><span class="html-tag">&gt;</span> <span class="html-tag">&lt;/NtTable&gt;</span>
- <span class="html-tag">&lt;/div&gt;</span>
-<span class="html-tag">&lt;/template&gt;</span>
+&lt;<span class="html-tag">template</span>&gt;
+&lt;<span class="html-tag">div</span> <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"sort_table"</span>&gt;
+  &lt;<span class="html-tag">NtTable</span> <span class="vue-directive">:header</span><span class="punctuation">=</span><span class="html-attr-value">"tableHeader"</span> <span class="vue-directive">:data</span><span class="punctuation">=</span><span class="html-attr-value">"largeData"</span>&gt; &lt;/<span class="html-tag">NtTable</span>&gt;
+&lt;/<span class="html-tag">div</span>&gt;
+&lt;/<span class="html-tag">template</span>&gt;
 
-<span class="html-tag">&lt;script</span> <span class="html-attr-name">setup</span> <span class="html-attr-name">lang</span><span class="punctuation">=</span><span class="html-attr-value">"ts"</span><span class="html-tag">&gt;</span>
+&lt;<span class="html-tag">script</span> <span class="html-attr-name">setup</span> <span class="html-attr-name">lang</span><span class="punctuation">=</span><span class="html-attr-value">"ts"</span>&gt;
 <span class="js-keyword">import</span> <span class="punctuation">&#123;</span> <span class="js-function">ref</span> <span class="punctuation">&#125;</span> <span class="js-keyword">from</span> <span class="js-string">'vue'</span>
 <span class="js-keyword">import</span> <span class="text-default">NtTable</span> <span class="js-keyword">from</span> <span class="js-string">'@lib/components/Data/NtTable.vue'</span>
 <span class="js-keyword">import</span> <span class="punctuation">&#123;</span> <span class="ts-type">DataType</span> <span class="punctuation">&#125;</span> <span class="js-keyword">from</span> <span class="js-string">'@lib/typing'</span>
 
 <span class="js-keyword">const</span> <span class="text-default">tableHeader</span> <span class="punctuation">=</span> <span class="js-function">ref</span><span class="punctuation">([</span>
- <span class="punctuation">&#123;</span>
-   <span class="text-default">key</span><span class="punctuation">:</span> <span class="js-string">'id'</span><span class="punctuation">,</span>
-   <span class="text-default">title</span><span class="punctuation">:</span> <span class="js-string">'ID'</span><span class="punctuation">,</span>
-   <span class="text-default">width</span><span class="punctuation">:</span> <span class="js-string">'15%'</span><span class="punctuation">,</span>
- <span class="punctuation">&#125;,</span>
- <span class="punctuation">&#123;</span>
-   <span class="text-default">key</span><span class="punctuation">:</span> <span class="js-string">'name'</span><span class="punctuation">,</span>
-   <span class="text-default">title</span><span class="punctuation">:</span> <span class="js-string">'姓名'</span><span class="punctuation">,</span>
-   <span class="text-default">width</span><span class="punctuation">:</span> <span class="js-string">'25%'</span><span class="punctuation">,</span>
-   <span class="text-default">sortable</span><span class="punctuation">:</span> <span class="ts-type">DataType</span><span class="punctuation">.</span><span class="text-default">AUTO</span><span class="punctuation">,</span>
- <span class="punctuation">&#125;,</span>
- <span class="punctuation">&#123;</span>
-   <span class="text-default">key</span><span class="punctuation">:</span> <span class="js-string">'email'</span><span class="punctuation">,</span>
-   <span class="text-default">title</span><span class="punctuation">:</span> <span class="js-string">'信箱'</span><span class="punctuation">,</span>
-   <span class="text-default">width</span><span class="punctuation">:</span> <span class="js-string">'30%'</span><span class="punctuation">,</span>
-   <span class="text-default">sortable</span><span class="punctuation">:</span> <span class="ts-type">DataType</span><span class="punctuation">.</span><span class="text-default">AUTO</span><span class="punctuation">,</span>
- <span class="punctuation">&#125;,</span>
- <span class="punctuation">&#123;</span>
-   <span class="text-default">key</span><span class="punctuation">:</span> <span class="js-string">'phone'</span><span class="punctuation">,</span>
-   <span class="text-default">title</span><span class="punctuation">:</span> <span class="js-string">'電話'</span><span class="punctuation">,</span>
-   <span class="text-default">width</span><span class="punctuation">:</span> <span class="js-string">'20%'</span><span class="punctuation">,</span>
- <span class="punctuation">&#125;,</span>
+<span class="punctuation">&#123;</span>
+  <span class="text-default">key</span><span class="punctuation">:</span> <span class="js-string">'id'</span><span class="punctuation">,</span>
+  <span class="text-default">title</span><span class="punctuation">:</span> <span class="js-string">'ID'</span><span class="punctuation">,</span>
+  <span class="text-default">width</span><span class="punctuation">:</span> <span class="js-string">'15%'</span><span class="punctuation">,</span>
+<span class="punctuation">&#125;,</span>
+<span class="punctuation">&#123;</span>
+  <span class="text-default">key</span><span class="punctuation">:</span> <span class="js-string">'name'</span><span class="punctuation">,</span>
+  <span class="text-default">title</span><span class="punctuation">:</span> <span class="js-string">'姓名'</span><span class="punctuation">,</span>
+  <span class="text-default">width</span><span class="punctuation">:</span> <span class="js-string">'25%'</span><span class="punctuation">,</span>
+  <span class="text-default">sortable</span><span class="punctuation">:</span> <span class="ts-type">DataType</span><span class="punctuation">.</span><span class="text-default">AUTO</span><span class="punctuation">,</span>
+<span class="punctuation">&#125;,</span>
+<span class="punctuation">&#123;</span>
+  <span class="text-default">key</span><span class="punctuation">:</span> <span class="js-string">'email'</span><span class="punctuation">,</span>
+  <span class="text-default">title</span><span class="punctuation">:</span> <span class="js-string">'信箱'</span><span class="punctuation">,</span>
+  <span class="text-default">width</span><span class="punctuation">:</span> <span class="js-string">'30%'</span><span class="punctuation">,</span>
+  <span class="text-default">sortable</span><span class="punctuation">:</span> <span class="ts-type">DataType</span><span class="punctuation">.</span><span class="text-default">AUTO</span><span class="punctuation">,</span>
+<span class="punctuation">&#125;,</span>
+<span class="punctuation">&#123;</span>
+  <span class="text-default">key</span><span class="punctuation">:</span> <span class="js-string">'phone'</span><span class="punctuation">,</span>
+  <span class="text-default">title</span><span class="punctuation">:</span> <span class="js-string">'電話'</span><span class="punctuation">,</span>
+  <span class="text-default">width</span><span class="punctuation">:</span> <span class="js-string">'20%'</span><span class="punctuation">,</span>
+<span class="punctuation">&#125;,</span>
 <span class="punctuation">])</span>
 
 <span class="js-keyword">const</span> <span class="text-default">largeData</span> <span class="punctuation">=</span> <span class="js-function">ref</span><span class="punctuation">&lt;</span><span class="ts-type">UserData</span><span class="punctuation">[]&gt;(</span><span class="js-function">generateUserData</span><span class="punctuation">(</span><span class="js-number">5</span><span class="punctuation">))</span>
-<span class="html-tag">&lt;/script&gt;</span></code></pre>
+&lt;/<span class="html-tag">script</span>&gt;</code></pre>
       </template>
       <template v-else>
         <pre><code>
-<span class="html-tag">&lt;NtTable</span> <span class="vue-directive">:header</span><span class="punctuation">=</span><span class="html-attr-value">"tableHeader"</span> <span class="vue-directive">:data</span><span class="punctuation">=</span><span class="html-attr-value">"largeData"</span><span class="html-tag">&gt;</span> <span class="html-tag">&lt;/NtTable&gt;</span>
-        </code></pre>
+&lt;<span class="html-tag">NtTable</span> <span class="vue-directive">:header</span><span class="punctuation">=</span><span class="html-attr-value">"tableHeader"</span> <span class="vue-directive">:data</span><span class="punctuation">=</span><span class="html-attr-value">"largeData"</span>&gt; &lt;/<span class="html-tag">NtTable</span>&gt;
+       </code></pre>
       </template>
     </div>
   </div>

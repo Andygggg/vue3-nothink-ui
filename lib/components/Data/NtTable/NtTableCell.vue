@@ -9,7 +9,7 @@
     >
       <slot
         :name="`td_${col.key}`"
-        :item="(row as T)"
+        :item="row"
         :value="(row as T)[col.key as keyof T]"
         :index="rowIndex"
         :isEditing="isEditing(rowIndex, colIndex)"
@@ -37,7 +37,7 @@ export interface TableCellProps<T = any> {
 
 // 顯式聲明插槽類型以支援泛型
 type TableCellSlots<T = any> = {
-  [K in `td_${string}`]: Slot< {
+  [K in `td_${string}`]: Slot<{
     item: T
     value: T[keyof T]
     index: number
@@ -90,7 +90,6 @@ const getColumnStyle = (col: TableColumn) => {
   if (props.isFixed && col.fixed) {
     style.position = 'sticky'
     style.zIndex = 20
-    style.background = `var(--nt-fixed-bg)`
 
     const position = getFixedPosition(col, colIndex)
     if (col.fixed === 'left') {
@@ -181,7 +180,7 @@ const cancelEdit = (rowIndex: number, colIndex: number) => {
 
   if (originalValues.value.has(cellKey)) {
     const originalValue = originalValues.value.get(cellKey)
-    ;((props.data[rowIndex] as T) as any)[col.key] = originalValue
+    ;(props.data[rowIndex] as T as any)[col.key] = originalValue
   }
 
   disableEdit(rowIndex, colIndex)
@@ -209,99 +208,5 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-.nt_table {
-  td {
-    padding: 12px 8px;
-    text-align: left;
-    vertical-align: middle;
-    white-space: nowrap;
-    color: var(--nt-cell-color);
-    background: var(--nt-cell-bg);
-    transition: background-color 0.25s ease;
-
-    &.ellipsis {
-      max-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
-
-  td {
-    border-bottom: 1px solid var(--nt-cell-border);
-  }
-
-  tbody tr {
-    transition: background-color 0.25s ease;
-
-    &:last-child td {
-      border-bottom: none;
-    }
-  }
-
-  &.nt_table--stripe tbody tr:nth-child(even) {
-    background: var(--nt-stripe-bg);
-
-    td.fixed-left,
-    td.fixed-right {
-      background: var(--nt-stripe-bg);
-    }
-
-    &:hover {
-      background: var(--nt-hover-bg);
-
-      td.fixed-left,
-      td.fixed-right {
-        background: var(--nt-hover-bg) !important;
-      }
-    }
-  }
-
-  // 尺寸變化
-  &.nt_table--small {
-    td {
-      padding: 6px 8px;
-      font-size: 14px;
-    }
-  }
-
-  &.nt_table--medium {
-    td {
-      padding: 10.5px 14px;
-      font-size: 15px;
-    }
-  }
-
-  &.nt_table--large {
-    td {
-      padding: 18px 16px;
-      font-size: 16px;
-    }
-  }
-
-  // 邊框
-  &.nt_table--border {
-    td {
-      border-right: 1px solid var(--nt-cell-border);
-
-      &:last-child {
-        border-right: none;
-      }
-    }
-  }
-
-  // hover 效果
-  &.nt_table--hover tbody tr:hover {
-    background: var(--nt-hover-bg);
-  }
-
-  // 對齊
-  .text-center {
-    text-align: center;
-  }
-
-  .text-right {
-    text-align: right;
-  }
-}
+@forward '../../../styles/NtTable.scss';
 </style>

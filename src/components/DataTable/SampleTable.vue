@@ -1,7 +1,7 @@
 <template>
   <div class="basic_content">
     <h2>範例</h2>
-    <p>參數項</p>
+    <p>模擬實際使用情形</p>
 
     <ul class="params_list">
       <li>
@@ -33,7 +33,7 @@
       </li>
     </ul>
 
-    <div class="basic_table">
+    <div class="sample_table">
       <NtTable
         :header="tableHeader"
         :data="largeData"
@@ -81,6 +81,185 @@
           </span>
         </template>
       </NtTable>
+    </div>
+
+    <div class="code_view_block" @click="toggleOpen">
+      <template v-if="isOpen">
+        <pre><code>&lt;<span class="html-tag">template</span>&gt;
+ &lt;<span class="html-tag">div</span> <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"sample_table"</span>&gt;
+   &lt;<span class="html-tag">NtTable</span>
+     <span class="vue-directive">:header</span><span class="punctuation">=</span><span class="html-attr-value">"tableHeader"</span>
+     <span class="vue-directive">:data</span><span class="punctuation">=</span><span class="html-attr-value">"largeData"</span>
+     <span class="vue-directive">:size</span><span class="punctuation">=</span><span class="html-attr-value">"tableSize"</span>
+     <span class="vue-directive">:cell-border</span><span class="punctuation">=</span><span class="html-attr-value">"isStatus('cellBorder')"</span>
+     <span class="vue-directive">:stripe</span><span class="punctuation">=</span><span class="html-attr-value">"isStatus('stripe')"</span>
+     <span class="vue-directive">:hover</span><span class="punctuation">=</span><span class="html-attr-value">"isStatus('hover')"</span>
+     <span class="vue-directive">:sticky-header</span><span class="punctuation">=</span><span class="html-attr-value">"isStatus('stickyHeader')"</span>
+     <span class="vue-directive">:loading</span><span class="punctuation">=</span><span class="html-attr-value">"isLoading"</span>
+   &gt;
+     &lt;<span class="html-tag">template</span> <span class="vue-directive">#td_name</span><span class="punctuation">=</span><span class="html-attr-value">"&#123; item, value, isEditing, disableEdit, handleEdit &#125;"</span>&gt;
+       &lt;<span class="html-tag">input</span>
+         <span class="vue-directive">v-if</span><span class="punctuation">=</span><span class="html-attr-value">"isEditing"</span>
+         <span class="vue-directive">v-model</span><span class="punctuation">=</span><span class="html-attr-value">"item.name"</span>
+         <span class="vue-directive">@blur</span><span class="punctuation">=</span><span class="html-attr-value">"disableEdit"</span>
+         <span class="vue-directive">@keyup.enter</span><span class="punctuation">=</span><span class="html-attr-value">"disableEdit"</span>
+         <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"edit-input"</span>
+       /&gt;
+       &lt;<span class="html-tag">span</span> <span class="vue-directive">v-else</span> <span class="vue-directive">@dblclick</span><span class="punctuation">=</span><span class="html-attr-value">"handleEdit"</span> <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"editable_cell"</span>&gt;
+         <span class="punctuation">&#123;&#123;</span> <span class="text-default">value</span> <span class="punctuation">&#125;&#125;</span>
+       &lt;/<span class="html-tag">span</span>&gt;
+     &lt;/<span class="html-tag">template</span>&gt;
+     &lt;<span class="html-tag">template</span> <span class="vue-directive">#td_email</span><span class="punctuation">=</span><span class="html-attr-value">"&#123; item, value, isEditing, disableEdit, handleEdit &#125;"</span>&gt;
+       &lt;<span class="html-tag">input</span>
+         <span class="vue-directive">v-if</span><span class="punctuation">=</span><span class="html-attr-value">"isEditing"</span>
+         <span class="vue-directive">v-model</span><span class="punctuation">=</span><span class="html-attr-value">"item.email"</span>
+         <span class="vue-directive">@blur</span><span class="punctuation">=</span><span class="html-attr-value">"disableEdit"</span>
+         <span class="vue-directive">@keyup.enter</span><span class="punctuation">=</span><span class="html-attr-value">"disableEdit"</span>
+         <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"edit-input"</span>
+       /&gt;
+       &lt;<span class="html-tag">span</span> <span class="vue-directive">v-else</span> <span class="vue-directive">@dblclick</span><span class="punctuation">=</span><span class="html-attr-value">"handleEdit"</span> <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"editable_cell"</span>&gt;
+         <span class="punctuation">&#123;&#123;</span> <span class="text-default">value</span> <span class="punctuation">&#125;&#125;</span>
+       &lt;/<span class="html-tag">span</span>&gt;
+     &lt;/<span class="html-tag">template</span>&gt;
+     &lt;<span class="html-tag">template</span> <span class="vue-directive">#td_phone</span><span class="punctuation">=</span><span class="html-attr-value">"&#123; item, value, isEditing, disableEdit, handleEdit &#125;"</span>&gt;
+       &lt;<span class="html-tag">input</span>
+         <span class="vue-directive">v-if</span><span class="punctuation">=</span><span class="html-attr-value">"isEditing"</span>
+         <span class="vue-directive">v-model</span><span class="punctuation">=</span><span class="html-attr-value">"item.phone"</span>
+         <span class="vue-directive">@blur</span><span class="punctuation">=</span><span class="html-attr-value">"disableEdit"</span>
+         <span class="vue-directive">@keyup.enter</span><span class="punctuation">=</span><span class="html-attr-value">"disableEdit"</span>
+         <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"edit-input"</span>
+       /&gt;
+       &lt;<span class="html-tag">span</span> <span class="vue-directive">v-else</span> <span class="vue-directive">@dblclick</span><span class="punctuation">=</span><span class="html-attr-value">"handleEdit"</span> <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"editable_cell"</span>&gt;
+         <span class="punctuation">&#123;&#123;</span> <span class="text-default">value</span> <span class="punctuation">&#125;&#125;</span>
+       &lt;/<span class="html-tag">span</span>&gt;
+     &lt;/<span class="html-tag">template</span>&gt;
+   &lt;/<span class="html-tag">NtTable</span>&gt;
+ &lt;/<span class="html-tag">div</span>&gt;
+&lt;/<span class="html-tag">template</span>&gt;
+
+&lt;<span class="html-tag">script</span> <span class="html-attr-name">setup</span> <span class="html-attr-name">lang</span><span class="punctuation">=</span><span class="html-attr-value">"ts"</span>&gt;
+<span class="js-keyword">import</span> <span class="punctuation">&#123;</span> <span class="js-function">reactive</span><span class="punctuation">,</span> <span class="js-function">ref</span><span class="punctuation">,</span> <span class="js-keyword">type</span> <span class="ts-type">Ref</span> <span class="punctuation">&#125;</span> <span class="js-keyword">from</span> <span class="js-string">'vue'</span>
+<span class="js-keyword">import</span> <span class="text-default">NtTable</span> <span class="js-keyword">from</span> <span class="js-string">'@lib/components/Data/NtTable/NtTable.vue'</span>
+
+<span class="js-keyword">const</span> <span class="text-default">tableSize</span><span class="punctuation">:</span> <span class="ts-type">Ref</span><span class="punctuation">&lt;</span><span class="js-string">'medium'</span> <span class="punctuation">|</span> <span class="js-string">'small'</span> <span class="punctuation">|</span> <span class="js-string">'large'</span><span class="punctuation">&gt;</span> <span class="punctuation">=</span> <span class="js-function">ref</span><span class="punctuation">(</span><span class="js-string">'medium'</span><span class="punctuation">)</span>
+<span class="js-keyword">const</span> <span class="text-default">sizeOptions</span> <span class="punctuation">=</span> <span class="punctuation">[</span><span class="js-string">'small'</span><span class="punctuation">,</span> <span class="js-string">'medium'</span><span class="punctuation">,</span> <span class="js-string">'large'</span><span class="punctuation">]</span>
+
+<span class="js-keyword">const</span> <span class="text-default">params_options</span> <span class="punctuation">=</span> <span class="js-function">reactive</span><span class="punctuation">([</span>
+ <span class="punctuation">&#123;</span> <span class="text-default">id</span><span class="punctuation">:</span> <span class="js-string">'cellBorder'</span><span class="punctuation">,</span> <span class="text-default">isUse</span><span class="punctuation">:</span> <span class="js-keyword">false</span><span class="punctuation">,</span> <span class="text-default">name</span><span class="punctuation">:</span> <span class="js-string">'邊框'</span> <span class="punctuation">&#125;,</span>
+ <span class="punctuation">&#123;</span> <span class="text-default">id</span><span class="punctuation">:</span> <span class="js-string">'stripe'</span><span class="punctuation">,</span> <span class="text-default">isUse</span><span class="punctuation">:</span> <span class="js-keyword">false</span><span class="punctuation">,</span> <span class="text-default">name</span><span class="punctuation">:</span> <span class="js-string">'條紋'</span> <span class="punctuation">&#125;,</span>
+ <span class="punctuation">&#123;</span> <span class="text-default">id</span><span class="punctuation">:</span> <span class="js-string">'hover'</span><span class="punctuation">,</span> <span class="text-default">isUse</span><span class="punctuation">:</span> <span class="js-keyword">false</span><span class="punctuation">,</span> <span class="text-default">name</span><span class="punctuation">:</span> <span class="js-string">'hover'</span> <span class="punctuation">&#125;,</span>
+ <span class="punctuation">&#123;</span> <span class="text-default">id</span><span class="punctuation">:</span> <span class="js-string">'stickyHeader'</span><span class="punctuation">,</span> <span class="text-default">isUse</span><span class="punctuation">:</span> <span class="js-keyword">false</span><span class="punctuation">,</span> <span class="text-default">name</span><span class="punctuation">:</span> <span class="js-string">'表頭固定'</span> <span class="punctuation">&#125;,</span>
+<span class="punctuation">])</span>
+
+<span class="js-keyword">const</span> <span class="text-default">isLoading</span> <span class="punctuation">=</span> <span class="js-function">ref</span><span class="punctuation">(</span><span class="js-keyword">false</span><span class="punctuation">)</span>
+
+<span class="js-keyword">const</span> <span class="text-default">isStatus</span> <span class="punctuation">=</span> <span class="punctuation">(</span><span class="text-default">key</span><span class="punctuation">:</span> <span class="ts-type">string</span><span class="punctuation">)</span> <span class="punctuation">=&gt;</span> <span class="punctuation">&#123;</span>
+ <span class="js-keyword">const</span> <span class="text-default">item</span> <span class="punctuation">=</span> <span class="text-default">params_options</span><span class="punctuation">.</span><span class="js-function">find</span><span class="punctuation">((</span><span class="text-default">item</span><span class="punctuation">)</span> <span class="punctuation">=&gt;</span> <span class="text-default">item</span><span class="punctuation">.</span><span class="text-default">id</span> <span class="punctuation">===</span> <span class="text-default">key</span><span class="punctuation">)</span>
+ <span class="js-keyword">return</span> <span class="text-default">item</span> <span class="punctuation">?</span> <span class="text-default">item</span><span class="punctuation">.</span><span class="text-default">isUse</span> <span class="punctuation">:</span> <span class="js-keyword">false</span>
+<span class="punctuation">&#125;</span>
+
+<span class="js-comment">// 表格設定</span>
+<span class="js-keyword">const</span> <span class="text-default">tableHeader</span> <span class="punctuation">=</span> <span class="js-function">ref</span><span class="punctuation">([</span>
+ <span class="punctuation">&#123;</span>
+   <span class="text-default">key</span><span class="punctuation">:</span> <span class="js-string">'id'</span><span class="punctuation">,</span>
+   <span class="text-default">title</span><span class="punctuation">:</span> <span class="js-string">'ID'</span><span class="punctuation">,</span>
+   <span class="text-default">width</span><span class="punctuation">:</span> <span class="js-string">'250px'</span><span class="punctuation">,</span>
+   <span class="text-default">fixed</span><span class="punctuation">:</span> <span class="js-string">'left'</span> <span class="js-keyword">as</span> <span class="js-keyword">const</span><span class="punctuation">,</span>
+   <span class="text-default">sortable</span><span class="punctuation">:</span> <span class="js-number">0</span><span class="punctuation">,</span>
+ <span class="punctuation">&#125;,</span>
+ <span class="punctuation">&#123;</span>
+   <span class="text-default">key</span><span class="punctuation">:</span> <span class="js-string">'name'</span><span class="punctuation">,</span>
+   <span class="text-default">title</span><span class="punctuation">:</span> <span class="js-string">'姓名'</span><span class="punctuation">,</span>
+   <span class="text-default">width</span><span class="punctuation">:</span> <span class="js-string">'250px'</span><span class="punctuation">,</span>
+   <span class="text-default">sortable</span><span class="punctuation">:</span> <span class="js-number">0</span><span class="punctuation">,</span>
+ <span class="punctuation">&#125;,</span>
+ <span class="punctuation">&#123;</span>
+   <span class="text-default">key</span><span class="punctuation">:</span> <span class="js-string">'email'</span><span class="punctuation">,</span>
+   <span class="text-default">title</span><span class="punctuation">:</span> <span class="js-string">'信箱'</span><span class="punctuation">,</span>
+   <span class="text-default">width</span><span class="punctuation">:</span> <span class="js-string">'300px'</span><span class="punctuation">,</span>
+   <span class="text-default">sortable</span><span class="punctuation">:</span> <span class="js-number">0</span><span class="punctuation">,</span>
+ <span class="punctuation">&#125;,</span>
+ <span class="punctuation">&#123;</span>
+   <span class="text-default">key</span><span class="punctuation">:</span> <span class="js-string">'phone'</span><span class="punctuation">,</span>
+   <span class="text-default">title</span><span class="punctuation">:</span> <span class="js-string">'電話'</span><span class="punctuation">,</span>
+   <span class="text-default">width</span><span class="punctuation">:</span> <span class="js-string">'300px'</span><span class="punctuation">,</span>
+   <span class="text-default">sortable</span><span class="punctuation">:</span> <span class="js-number">0</span><span class="punctuation">,</span>
+ <span class="punctuation">&#125;,</span>
+<span class="punctuation">])</span>
+
+<span class="js-keyword">const</span> <span class="text-default">largeData</span> <span class="punctuation">=</span> <span class="js-function">ref</span><span class="punctuation">&lt;</span><span class="ts-type">UserData</span><span class="punctuation">[]&gt;(</span><span class="js-function">generateUserData</span><span class="punctuation">(</span><span class="js-number">20</span><span class="punctuation">))</span>
+
+<span class="js-keyword">const</span> <span class="text-default">changeSize</span> <span class="punctuation">=</span> <span class="punctuation">(</span><span class="text-default">size</span><span class="punctuation">:</span> <span class="ts-type">string</span><span class="punctuation">)</span> <span class="punctuation">=&gt;</span> <span class="punctuation">&#123;</span>
+ <span class="text-default">tableSize</span><span class="punctuation">.</span><span class="text-default">value</span> <span class="punctuation">=</span> <span class="text-default">size</span> <span class="js-keyword">as</span> <span class="js-string">'small'</span> <span class="punctuation">|</span> <span class="js-string">'medium'</span> <span class="punctuation">|</span> <span class="js-string">'large'</span>
+<span class="punctuation">&#125;</span>
+
+<span class="js-keyword">const</span> <span class="text-default">clear</span> <span class="punctuation">=</span> <span class="punctuation">()</span> <span class="punctuation">=&gt;</span> <span class="punctuation">&#123;</span>
+ <span class="text-default">largeData</span><span class="punctuation">.</span><span class="text-default">value</span> <span class="punctuation">=</span> <span class="js-function">generateUserData</span><span class="punctuation">(</span><span class="js-number">0</span><span class="punctuation">)</span>
+<span class="punctuation">&#125;</span>
+
+<span class="js-keyword">const</span> <span class="text-default">reload</span> <span class="punctuation">=</span> <span class="punctuation">()</span> <span class="punctuation">=&gt;</span> <span class="punctuation">&#123;</span>
+ <span class="text-default">isLoading</span><span class="punctuation">.</span><span class="text-default">value</span> <span class="punctuation">=</span> <span class="js-keyword">true</span>
+ <span class="text-default">largeData</span><span class="punctuation">.</span><span class="text-default">value</span> <span class="punctuation">=</span> <span class="js-function">generateUserData</span><span class="punctuation">(</span><span class="js-number">20</span><span class="punctuation">)</span>
+ <span class="js-function">setTimeout</span><span class="punctuation">(()</span> <span class="punctuation">=&gt;</span> <span class="punctuation">&#123;</span>
+   <span class="text-default">isLoading</span><span class="punctuation">.</span><span class="text-default">value</span> <span class="punctuation">=</span> <span class="js-keyword">false</span>
+ <span class="punctuation">&#125;,</span> <span class="js-number">1000</span><span class="punctuation">)</span>
+<span class="punctuation">&#125;</span>
+&lt;/<span class="html-tag">script</span>&gt;</code></pre>
+      </template>
+      <template v-else>
+        <pre><code>&lt;<span class="html-tag">template</span>&gt;
+ &lt;<span class="html-tag">div</span> <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"sample_table"</span>&gt;
+   &lt;<span class="html-tag">NtTable</span>
+     <span class="vue-directive">:header</span><span class="punctuation">=</span><span class="html-attr-value">"tableHeader"</span>
+     <span class="vue-directive">:data</span><span class="punctuation">=</span><span class="html-attr-value">"largeData"</span>
+     <span class="vue-directive">:size</span><span class="punctuation">=</span><span class="html-attr-value">"tableSize"</span>
+     <span class="vue-directive">:cell-border</span><span class="punctuation">=</span><span class="html-attr-value">"isStatus('cellBorder')"</span>
+     <span class="vue-directive">:stripe</span><span class="punctuation">=</span><span class="html-attr-value">"isStatus('stripe')"</span>
+     <span class="vue-directive">:hover</span><span class="punctuation">=</span><span class="html-attr-value">"isStatus('hover')"</span>
+     <span class="vue-directive">:sticky-header</span><span class="punctuation">=</span><span class="html-attr-value">"isStatus('stickyHeader')"</span>
+     <span class="vue-directive">:loading</span><span class="punctuation">=</span><span class="html-attr-value">"isLoading"</span>
+   &gt;
+     &lt;<span class="html-tag">template</span> <span class="vue-directive">#td_name</span><span class="punctuation">=</span><span class="html-attr-value">"&#123; item, value, isEditing, disableEdit, handleEdit &#125;"</span>&gt;
+       &lt;<span class="html-tag">input</span>
+         <span class="vue-directive">v-if</span><span class="punctuation">=</span><span class="html-attr-value">"isEditing"</span>
+         <span class="vue-directive">v-model</span><span class="punctuation">=</span><span class="html-attr-value">"item.name"</span>
+         <span class="vue-directive">@blur</span><span class="punctuation">=</span><span class="html-attr-value">"disableEdit"</span>
+         <span class="vue-directive">@keyup.enter</span><span class="punctuation">=</span><span class="html-attr-value">"disableEdit"</span>
+         <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"edit-input"</span>
+       /&gt;
+       &lt;<span class="html-tag">span</span> <span class="vue-directive">v-else</span> <span class="vue-directive">@dblclick</span><span class="punctuation">=</span><span class="html-attr-value">"handleEdit"</span> <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"editable_cell"</span>&gt;
+         <span class="punctuation">&#123;&#123;</span> <span class="text-default">value</span> <span class="punctuation">&#125;&#125;</span>
+       &lt;/<span class="html-tag">span</span>&gt;
+     &lt;/<span class="html-tag">template</span>&gt;
+     &lt;<span class="html-tag">template</span> <span class="vue-directive">#td_email</span><span class="punctuation">=</span><span class="html-attr-value">"&#123; item, value, isEditing, disableEdit, handleEdit &#125;"</span>&gt;
+       &lt;<span class="html-tag">input</span>
+         <span class="vue-directive">v-if</span><span class="punctuation">=</span><span class="html-attr-value">"isEditing"</span>
+         <span class="vue-directive">v-model</span><span class="punctuation">=</span><span class="html-attr-value">"item.email"</span>
+         <span class="vue-directive">@blur</span><span class="punctuation">=</span><span class="html-attr-value">"disableEdit"</span>
+         <span class="vue-directive">@keyup.enter</span><span class="punctuation">=</span><span class="html-attr-value">"disableEdit"</span>
+         <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"edit-input"</span>
+       /&gt;
+       &lt;<span class="html-tag">span</span> <span class="vue-directive">v-else</span> <span class="vue-directive">@dblclick</span><span class="punctuation">=</span><span class="html-attr-value">"handleEdit"</span> <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"editable_cell"</span>&gt;
+         <span class="punctuation">&#123;&#123;</span> <span class="text-default">value</span> <span class="punctuation">&#125;&#125;</span>
+       &lt;/<span class="html-tag">span</span>&gt;
+     &lt;/<span class="html-tag">template</span>&gt;
+     &lt;<span class="html-tag">template</span> <span class="vue-directive">#td_phone</span><span class="punctuation">=</span><span class="html-attr-value">"&#123; item, value, isEditing, disableEdit, handleEdit &#125;"</span>&gt;
+       &lt;<span class="html-tag">input</span>
+         <span class="vue-directive">v-if</span><span class="punctuation">=</span><span class="html-attr-value">"isEditing"</span>
+         <span class="vue-directive">v-model</span><span class="punctuation">=</span><span class="html-attr-value">"item.phone"</span>
+         <span class="vue-directive">@blur</span><span class="punctuation">=</span><span class="html-attr-value">"disableEdit"</span>
+         <span class="vue-directive">@keyup.enter</span><span class="punctuation">=</span><span class="html-attr-value">"disableEdit"</span>
+         <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"edit-input"</span>
+       /&gt;
+       &lt;<span class="html-tag">span</span> <span class="vue-directive">v-else</span> <span class="vue-directive">@dblclick</span><span class="punctuation">=</span><span class="html-attr-value">"handleEdit"</span> <span class="html-attr-name">class</span><span class="punctuation">=</span><span class="html-attr-value">"editable_cell"</span>&gt;
+         <span class="punctuation">&#123;&#123;</span> <span class="text-default">value</span> <span class="punctuation">&#125;&#125;</span>
+       &lt;/<span class="html-tag">span</span>&gt;
+     &lt;/<span class="html-tag">template</span>&gt;
+   &lt;/<span class="html-tag">NtTable</span>&gt;
+ &lt;/<span class="html-tag">div</span>&gt;
+&lt;/<span class="html-tag">template</span>&gt;
+        </code></pre>
+      </template>
     </div>
   </div>
 </template>
@@ -143,6 +322,8 @@ const tableHeader = ref([
   },
 ])
 
+const isOpen = ref(false)
+
 // 生成測試數據
 const generateUserData = (count: number): UserData[] => {
   const data = Array.from({ length: count }, (_, i) => ({
@@ -178,6 +359,10 @@ const reload = () => {
   setTimeout(() => {
     isLoading.value = false
   }, 1000)
+}
+
+const toggleOpen = () => {
+  isOpen.value = !isOpen.value
 }
 </script>
 
@@ -271,7 +456,7 @@ const reload = () => {
   }
 }
 
-.basic_table {
+.sample_table {
   height: 450px;
   width: 100%;
   padding: 0.5rem;
