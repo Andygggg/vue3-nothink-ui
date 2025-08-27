@@ -104,7 +104,7 @@ const component_option = shallowRef<ComponentOption[]>([
   },
   {
     id: 'FixedCellTable',
-    name: '固定列',
+    name: '固定行',
     component: FixedCellTable,
   },
   {
@@ -136,7 +136,7 @@ const scrollToComponent = (componentId: string): void => {
   if (element) {
     element.scrollIntoView({
       behavior: 'smooth',
-      block: 'end',
+      block: 'start',
       inline: 'nearest',
     })
     currentSection.value = componentId
@@ -173,6 +173,10 @@ const scrollToComponent = (componentId: string): void => {
     font-size: 16px;
     font-weight: 500;
   }
+}
+
+[id] {
+  scroll-margin-top: 59px;
 }
 
 .bread_crumb_block {

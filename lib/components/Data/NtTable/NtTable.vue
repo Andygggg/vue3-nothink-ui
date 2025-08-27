@@ -93,20 +93,23 @@ const emit = defineEmits<{
 //排序管理器
 const sortManager = ref<DataSorter<T>>(new DataSorter(props.data))
 
-const tableWrapper = ref<HTMLElement | null>(null)
+const tableWrapper = ref<HTMLElement | null>(null) // 包裝容器引用
 const scrollWrapRef = ref<HTMLElement | null>(null) // 滾動容器引用
 const headerRef = ref<HTMLElement | null>(null) // 表頭引用
 
 const tableHeight = ref(0) // 當前表格高度
+const theadHeight = ref(0) // 當前表頭高度
 
-const tableResizeObserver = ref<ResizeObserver | null>(null) // 用於監聽尺寸變化
+const tableResizeObserver = ref<ResizeObserver | null>(null) // 用於監聽表格尺寸變化
+const theadResizeObserver = ref<ResizeObserver | null>(null) // 用於監聽表頭尺寸變化
 
 //scrollbar配置
 const scrollbarConfig = computed(() => {
   let top = 0
   if (props.stickyHeader) {
-    top = headerRef.value ? headerRef.value.offsetHeight : 0
+    top = theadHeight.value
   }
+
   return {
     container: scrollWrapRef.value ? scrollWrapRef.value : '',
     top,
@@ -133,6 +136,7 @@ const tableMaxHeight = computed(() => {
   return style
 })
 
+// 判斷是否需要水平固定
 const isFixedHorizontal = computed(() => {
   if (!scrollWrapRef.value) return false
   return scrollWrapRef.value.scrollWidth > scrollWrapRef.value.clientWidth
@@ -173,12 +177,16 @@ onMounted(async () => {
 
   await nextTick(async () => {
     if (props.maxHeight === 'auto') await updateHeight()
-  }) // 初始載入時更新一次狀態，確保 DOM 尺寸已準備好
+  })
 })
 
 onUnmounted(() => {
   if (tableWrapper.value && tableWrapper.value.parentElement) {
     tableResizeObserver.value?.unobserve(tableWrapper.value.parentElement) // 監聽容器尺寸變化
+  }
+
+  if (theadResizeObserver.value) {
+    theadResizeObserver.value.disconnect()
   }
 })
 
@@ -188,6 +196,27 @@ watch(
     sortManager.value.update(newData)
   },
   { deep: true },
+)
+
+watch(
+  () => props.stickyHeader,
+  (newVal) => {
+    if (!newVal) return
+    if (headerRef.value) {
+      // 1.初始化高度
+      theadHeight.value = headerRef.value.offsetHeight
+
+      // 2.監聽尺寸變化
+      theadResizeObserver.value = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          theadHeight.value = entry.contentRect.height
+        }
+      })
+
+      theadResizeObserver.value.observe(headerRef.value)
+    }
+  },
+  { immediate: true },
 )
 
 //========================================css樣式========================================

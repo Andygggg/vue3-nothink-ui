@@ -1,4 +1,3 @@
-<!-- NtTableCell.vue -->
 <template>
   <tr v-for="(row, rowIndex) in props.data" :key="`tr_${rowIndex}`">
     <td

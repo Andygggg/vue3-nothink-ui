@@ -1,6 +1,6 @@
 <template>
   <div class="horizontal_scroll_content">
-    <h2>固定列</h2>
+    <h2>固定行</h2>
     <p
       >可以透header屬性的物件配置fixed屬性，為該行在水平滾動期間可以固定在畫面左方或右方，fixed屬性值為left或right。</p
     >

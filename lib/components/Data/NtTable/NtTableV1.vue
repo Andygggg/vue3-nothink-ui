@@ -305,10 +305,10 @@ const getColumnStyle = (col: TableColumn, type: 'header' | 'cell' = 'cell') => {
 }
 
 /**
- * 計算固定列的位置
+ * 計算固定行的位置
  * @param col 列配置
  * @param colIndex 列在 columns 中的索引
- * @returns 返回固定列的 x 軸位置
+ * @returns 返回固定行的 x 軸位置
  */
 const getFixedPosition = (col: TableColumn, colIndex: number) => {
   if (!col.fixed || colIndex === 0) return '0'

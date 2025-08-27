@@ -43,7 +43,7 @@ const props = withDefaults(
 )
 
 const scrollWrapRef = ref<HTMLElement | null>(null) // 滾動容器引用
-const scrollMutationObserver = ref<MutationObserver | null>(null)// 用於監聽變化
+const scrollMutationObserver = ref<MutationObserver | null>(null) // 用於監聽變化
 // 滾動狀態
 const scrollLeft = ref(0)
 const scrollTop = ref(0)
@@ -167,15 +167,14 @@ onMounted(async () => {
 
     scrollMutationObserver.value = new MutationObserver(() => {
       nextTick(() => {
-        console.log('MutationObserver triggered');
         initScrollbar()
       })
     })
 
     scrollMutationObserver.value.observe(scrollWrapRef.value, {
-      childList: true,      // 監聽子節點的增減
-      subtree: true,        // 監聽後代節點
-      attributes: true,     // 監聽屬性變化
+      childList: true, // 監聽子節點的增減
+      subtree: true, // 監聽後代節點
+      attributes: true, // 監聽屬性變化
       attributeFilter: ['style', 'class'], // 只監聽可能影響尺寸的屬性
     })
   }
