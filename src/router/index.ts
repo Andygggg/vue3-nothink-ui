@@ -12,19 +12,27 @@ const router = createRouter({
       },
       children: [
         {
-          path: 'TreeList',
-          name: 'TreeList',
-          component: () => import('../views/Data/TreeList.vue'),
-          meta: {
-            name: 'Tree',
-          },
-        },
-        {
           path: 'DataTable',
           name: 'DataTable',
           component: () => import('../views/Data/DataTable.vue'),
           meta: {
             name: 'DataTable',
+          },
+        },
+        {
+          path: 'Paginator',
+          name: 'Paginator',
+          component: () => import('../views/Data/Paginator.vue'),
+          meta: {
+            name: 'Paginator',
+          },
+        },
+        {
+          path: 'TreeList',
+          name: 'TreeList',
+          component: () => import('../views/Data/TreeList.vue'),
+          meta: {
+            name: 'Tree',
           },
         },
       ],
