@@ -19,7 +19,7 @@
       <transition name="slide-down">
         <div class="pre_page_options" v-if="isDrop">
           <ul>
-            <li v-for="value in props.pageSize" :key="value" @click="selectPage(value)">
+            <li v-for="value in props.pageSize" :key="value" @click="selectPage(value)" :class="{active: value === currentCount}">
               {{ value }}
             </li>
           </ul>
@@ -52,23 +52,21 @@
     <span class="page_group">
       <template v-if="isSmallSize">
         <div class="page_input">
-          <input type="text" v-model="currentPage" />
-          <span>/&nbsp;{{ props.totalPage }}</span>
+          <input type="text" id="page_input" :placeholder="`${currentPage}`" @keyup.enter="handleToPage" />
+          <span>/</span>
+          <span>{{ props.totalPage }}</span>
         </div>
       </template>
-      <template v-else>
+      <template v-for="page in visiblePages" :key="page" v-else>
         <button
-          v-for="(page, idx) in visiblePages"
-          :key="idx"
-          :class="{
-            active: currentPage === page,
-            single: isSmallSize,
-          }"
+          v-if=" typeof page == 'number'"
+          class="page-btn"
+          :class="{ active: page === currentPage }"
           @click="toPage(page)"
-          :data-total="`\u00A0/\u00A0${props.totalPage}`"
         >
           {{ page }}
         </button>
+        <span v-else class="ellipsis">...</span>
       </template>
     </span>
     <button @click="nextPage" :class="{ disable: currentPage === props.totalPage }">
@@ -104,14 +102,14 @@
         inputmode="numeric"
         ref="inputRef"
         @blur="checkValidation"
-        @keyup.enter="handleInputToPage"
+        @keyup.enter="handleToPage"
       />
       <label for="goPage">Go&nbsp;to</label>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         xmlns:xlink="http://www.w3.org/1999/xlink"
         viewBox="0 0 24 24"
-        @click="handleInputToPage"
+        @click="handleToPageByJumper"
       >
         <path
           d="M8.59 16.59L13.17 12L8.59 7.41L10 6l6 6l-6 6l-1.41-1.41z"
@@ -123,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, onMounted, onUnmounted, nextTick } from 'vue'
+import { computed, ref, useTemplateRef, onMounted, onUnmounted, nextTick, watch, type Ref } from 'vue'
 import type { PaginatorProp } from '@lib/typing'
 
 const props = withDefaults(defineProps<PaginatorProp>(), {
@@ -135,6 +133,10 @@ const props = withDefaults(defineProps<PaginatorProp>(), {
   smallLayout: 0,
 })
 
+const emit = defineEmits<{
+  (e: 'goPage', page: number): void
+}>()
+
 const currentPage = ref(props.currentPage)
 const currentCount = ref(props.pageSize.length ? props.pageSize[0] : 0)
 const isDrop = ref(false)
@@ -143,41 +145,53 @@ const isSmallSize = ref(false)
 const dropdownRef = useTemplateRef('dropdownRef')
 const paginatorRef = useTemplateRef('paginatorRef')
 const inputRef = useTemplateRef('inputRef')
-const paginatorResizeObserver = ref<ResizeObserver | null>(null)
+const paginatorResizeObserver:Ref<ResizeObserver | null> = ref(null)
 
+//當前顯示頁數
 const visiblePages = computed(() => {
-  const pages = [] // 最終要顯示的頁碼陣列
-  const showCount = isSmallSize.value ? 1 : props.pagerCount
-  const current = currentPage.value
-  const total = props.totalPage
+  const pages: (number | string)[] = [];
+  const showCount = isSmallSize.value ? 1 : props.pagerCount - 1; // 固定顯示5個連續數字
+  const current = currentPage.value;
+  const total = props.totalPage;
 
-  // === 情況1: 總頁數不足5頁 ===
+  // === 情況1: 總頁數不足或等於5頁 ===
   if (total <= showCount) {
-    // 例如：總共3頁 -> [1, 2, 3]
     for (let i = 1; i <= total; i++) {
-      pages.push(i)
+      pages.push(i);
     }
-    return pages
+    return pages;
   }
 
-  // === 情況2: 總頁數 >= 5頁，固定顯示5個數字 ===
-  // 計算起始頁碼
-  let start = current - Math.floor(showCount / 2) // 當前頁居中
-  // 如果起始頁小於1，從第1頁開始
+  // === 情況2: 總頁數大於5頁 ===
+  // 計算5個連續數字的起始位置
+  let start = current - Math.floor(showCount / 2); // 讓當前頁居中
+
+  // 邊界修正：不能小於1
   if (start < 1) {
-    start = 1
-  }
-  // 如果結束頁超過總頁數，往前調整
-  if (start + showCount - 1 > total) {
-    start = total - showCount + 1
-  }
-  // 生成5個連續的頁碼
-  for (let i = 0; i < showCount; i++) {
-    pages.push(start + i)
+    start = 1;
   }
 
-  return pages
-})
+  // 邊界修正：確保不會包含最後一頁（為最後一頁預留空間）
+  if (start + showCount - 1 >= total) {
+    start = total - showCount;
+  }
+
+  // 生成5個連續數字
+  for (let i = 0; i < showCount; i++) {
+    pages.push(start + i);
+  }
+
+  // 如果5個連續數字沒有包含最後一頁，則添加省略號和最後一頁
+  if (start + showCount - 1 < total) {
+    // 只有在5個連續數字和最後一頁之間有間隔時才加省略號
+    if (start + showCount < total) {
+      pages.push('...');
+    }
+    pages.push(total);
+  }
+
+  return pages;
+});
 
 onMounted(() => {
   if (paginatorRef.value && props.smallLayout) {
@@ -196,33 +210,57 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 
+watch(() => props.currentPage, (newVal) => {
+  currentPage.value = newVal
+})
+
 //====================================切換頁數====================================
+/**
+ * 下一頁
+ */
 const nextPage = () => {
   if (currentPage.value < props.totalPage) {
     currentPage.value++
+    emit('goPage', currentPage.value)
   }
 }
-
+/**
+ * 最後一頁
+ */
 const lastPage = () => {
   currentPage.value = props.totalPage
+  emit('goPage', currentPage.value)
 }
-
+/**
+ * 上一頁
+ */
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
   } else {
     currentPage.value = 1
   }
+  emit('goPage', currentPage.value)
 }
-
+/**
+ * 第一頁
+ */
 const startPage = () => {
   currentPage.value = 1
+  emit('goPage', currentPage.value)
 }
-
+/**
+ * 前往指定頁數
+ * @param val 頁數
+ */
 const toPage = (val: number) => {
   currentPage.value = val
+  emit('goPage', currentPage.value)
 }
-
+/**
+ * 檢查字串是否為數字
+ * @param event dom事件
+ */
 const checkValidation = (event: Event) => {
   const input = event.target as HTMLInputElement
   // 如果不是純數字就清空
@@ -230,17 +268,38 @@ const checkValidation = (event: Event) => {
     input.value = ''
   }
 }
-
-const handleInputToPage = () => {
+/**
+ * 處理輸入框進行頁數跳轉
+ */
+const handleToPageByJumper = () => {
   const value = inputRef.value?.value ?? ''
+  //檢查字串是否僅有數字
   if (/^\d+$/.test(value)) {
     currentPage.value = Number(value)
+    emit('goPage', currentPage.value)
   }
 
+  //清空並離開input
   if (inputRef.value) {
     inputRef.value.value = ''
     inputRef.value.blur()
   }
+}
+/**
+ * 處理響應式輸入框跳轉功能
+ * @param event
+ */
+const handleToPage = (event: Event) => {
+  const inputElement = event.target as HTMLInputElement
+  const value = inputElement.value
+
+  if (/^\d+$/.test(value)) {
+    currentPage.value = Number(value)
+    emit('goPage', currentPage.value)
+    inputElement.value = ''
+  }
+
+  inputElement.blur()
 }
 
 //====================================數量選單====================================
@@ -276,6 +335,19 @@ const updateResponsiveStyle = async () => {
 
 <style lang="scss" scoped>
 .nt_paginator_box {
+  --nt-page-text: 15px;
+  --nt-page-color: #334155;
+  --nt-page-btn: #64748b;
+  --nt-page-btn-bg: transparent;
+  --nt-page-btn-hover: #f1f5f9;
+  --nt-page-btn-active: #000;
+  --nt-page-text-active: #fff;
+  --nt-page-input-border: 1px solid #cbd5e1;
+  --nt-page-input-focus: #aab1bb;
+  --nt-page-input-text: 14px;
+  --nt-select-text-active: #ffffff;
+  --nt-select-bg-active: #000;
+
   width: 100%;
   height: auto;
   display: flex;
@@ -283,7 +355,7 @@ const updateResponsiveStyle = async () => {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  color: #334155;
+  color: var(--nt-page-color);
   background: transparent;
   gap: 0.25rem;
 
@@ -292,8 +364,8 @@ const updateResponsiveStyle = async () => {
     height: 35px;
     border: none;
     border-radius: 50%;
-    color: #64748b;
-    background: transparent;
+    color: var(--nt-page-btn);
+    background: var(--nt-page-btn-bg);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -315,7 +387,7 @@ const updateResponsiveStyle = async () => {
     }
 
     &:hover {
-      background: #f1f5f9;
+      background: var(--nt-page-btn-hover);
     }
 
     &.disable {
@@ -332,7 +404,7 @@ const updateResponsiveStyle = async () => {
   gap: 0.25rem;
 
   > button {
-    font-size: 15px;
+    font-size: var(--nt-page-text);
     font-weight: 500;
     font-family:
       Inter var,
@@ -349,47 +421,51 @@ const updateResponsiveStyle = async () => {
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 
     &.active {
-      background: #000;
-      color: #fff;
-    }
-
-    &.single {
-      padding: 0 0.5rem;
-      background: transparent !important;
-      color: #64748b;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      cursor: default;
-
-      &::after {
-        content: attr(data-total);
-      }
+      background: var(--nt-page-btn-active);
+      color: var(--nt-page-text-active);
     }
   }
 
   .page_input {
-    border: 1px solid #cbd5e1;
+    border: var(--nt-page-input-border);
     border-radius: 6px;
     padding: 0.25rem 0.5rem;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+
+    &:focus-within {
+      border-color: var(--nt-page-input-focus);
+    }
 
     > input {
       padding: 0.25rem 0.5rem;
-      max-width: 28px;
-      width: 100%;
-      height: auto;
+      max-width: 48px;
+      height: 24px;
       border: none;
       outline: none;
-      color: #334155;
-      font-size: 14px;
+      color: var(--nt-page-color);
+      font-size: var(--nt-page-input-text);
       font-weight: 400;
       text-align: center;
     }
+
+    > span {
+      padding: 0rem 0.5rem;
+      color: var(--nt-page-color);
+      height: 24px;
+      line-height: 24px;
+      font-size: var(--nt-page-input-text);
+      font-weight: 400;
+      text-align: center;
+    }
+  }
+
+  .ellipsis {
+    cursor: default;
   }
 }
 
@@ -405,7 +481,7 @@ const updateResponsiveStyle = async () => {
   flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
-  border: 1px solid #cbd5e1;
+  border: var(--nt-page-input-border);
   border-radius: 6px;
   outline-color: transparent;
   box-shadow:
@@ -417,7 +493,7 @@ const updateResponsiveStyle = async () => {
   user-select: none;
 
   &:hover {
-    border-color: #aab1bb;
+    border-color: var(--nt-page-input-focus);
   }
 
   > span {
@@ -429,11 +505,11 @@ const updateResponsiveStyle = async () => {
     padding: 0.25rem 0.5rem;
     text-overflow: ellipsis;
     cursor: pointer;
-    color: #334155;
+    color: var(--nt-page-color);
     background: transparent;
     border: 0 none;
     outline: 0 none;
-    font-size: 1rem;
+    font-size: var(--nt-page-text);
   }
 
   > .dropdown_btn {
@@ -442,7 +518,7 @@ const updateResponsiveStyle = async () => {
     justify-content: center;
     flex-shrink: 0;
     background: transparent;
-    color: #94a3b8;
+    color: var(--nt-page-btn);
     width: 2.5rem;
     border-start-end-radius: 6px;
     border-end-end-radius: 6px;
@@ -464,7 +540,7 @@ const updateResponsiveStyle = async () => {
   transition: all 0.3s ease;
   z-index: 1000;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border: 1px solid #cbd5e1;
+  border: var(--nt-page-input-border);
   border-radius: 6px;
 
   &::-webkit-scrollbar {
@@ -494,8 +570,8 @@ const updateResponsiveStyle = async () => {
     > li {
       width: 100%;
       height: 31px;
-      color: #64748b;
-      font-size: 15px;
+      color: var(--nt-page-btn);
+      font-size: var(--nt-page-text);
       font-weight: 500;
       padding: 0.5rem 0.75rem;
       border-radius: 6px;
@@ -505,12 +581,12 @@ const updateResponsiveStyle = async () => {
       cursor: pointer;
 
       &:hover {
-        background: #f1f5f9;
+        background: var(--nt-page-btn-hover);
       }
 
-      &:first-child {
-        background: #000;
-        color: #fff;
+      &.active {
+        background: var(--nt-select-bg-active);
+        color: var(--nt-select-text-active);
       }
     }
   }
@@ -527,10 +603,10 @@ const updateResponsiveStyle = async () => {
     padding: 0.25rem 1.5rem 0.25rem 0.5rem;
     outline: none;
     background: transparent;
-    color: #334155;
-    border: 1px solid #cbd5e1;
+    color: var(--nt-page-color);
+    border: var(--nt-page-input-border);
     border-radius: 6px;
-    font-size: 15px;
+    font-size: var(--nt-page-text);
     font-weight: 400;
     text-align: center;
 
@@ -542,7 +618,6 @@ const updateResponsiveStyle = async () => {
         padding: 0 5px;
         transform: translateX(0.1rem) translateY(-7.5px);
         background: #ffffff;
-        color: #545455;
         letter-spacing: 0em;
       }
     }
@@ -558,7 +633,7 @@ const updateResponsiveStyle = async () => {
     font-size: 12px;
     font-weight: 500;
     transition: 0.2s cubic-bezier(0.05, 0.81, 0, 0.93);
-    color: #334155;
+    color: var(--nt-page-color);
     letter-spacing: 0.1em;
   }
 
@@ -566,13 +641,14 @@ const updateResponsiveStyle = async () => {
     position: absolute;
     top: 50%;
     right: 0;
-    color: #94a3b8;
+    color: var(--nt-page-btn);
     transform: translateY(-50%);
     width: 1.5rem;
     height: 1.5rem;
     cursor: pointer;
+
     &:hover {
-      color: #8f9091;
+      opacity: 0.7;
     }
   }
 }

@@ -38,6 +38,25 @@ const router = createRouter({
       ],
       redirect: { name: 'DataTable' },
     },
+    {
+      path: '/Misc',
+      name: 'Misc',
+      component: () => import('../views/index.vue'),
+      meta: {
+        name: 'Misc',
+      },
+      children: [
+        {
+          path: 'Avatar',
+          name: 'Avatar',
+          component: () => import('../views/Misc/Avatar.vue'),
+          meta: {
+            name: 'Avatar',
+          },
+        },
+      ],
+      redirect: { name: 'Avatar' },
+    },
   ],
 })
 

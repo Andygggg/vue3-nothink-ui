@@ -1,24 +1,25 @@
 <template>
-  <div class="base_paginator_content">
-    <h2>基礎分頁器</h2>
-    <p>分頁器預設基礎用法展示。</p>
+  <div class="base_avatar_content">
+    <h2>圖片顯示</h2>
+    <p>頭像預設基礎用法展示。</p>
 
-    <div class="base_paginator">
-      <NtPaginator :current-page="1" :total-page="12" @go-page="changePage"></NtPaginator>
+    <div class="base_avatar">
+      <nt-avatar
+        :name="'不想工作室'"
+        :src="logo"
+        :size="'medium'"
+      ></nt-avatar>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import NtPaginator from '@lib/components/Data/NtPaginator.vue'
-
-const changePage = (page: number) => {
-  console.log(page);
-}
+import NtAvatar from '@lib/components/Misc/NtAvatar.vue'
+import logo from '@/assets/logo.svg'
 </script>
 
 <style lang="scss" scoped>
-.base_paginator_content {
+.base_avatar_content {
   width: 100%;
   height: auto;
   margin-top: 30px;
@@ -37,10 +38,10 @@ const changePage = (page: number) => {
   }
 }
 
-.base_paginator {
-  height: 300px;
+.base_avatar {
+  height: 150px;
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   background: #fff;
@@ -48,6 +49,6 @@ const changePage = (page: number) => {
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 </style>
