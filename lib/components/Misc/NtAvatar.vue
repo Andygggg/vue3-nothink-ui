@@ -1,5 +1,5 @@
 <template>
-  <div class="avatar" :class="[sizeClass, shapeClass]" :style="avatarStyle">
+  <div class="nt_avatar" :class="[avatarClass]" :style="avatarStyle">
     <img
       v-if="src && !imageError"
       :src="src"
@@ -16,19 +16,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-type AvatarSize = 'small' | 'medium' | 'large' | number
-type AvatarShape = 'circle' | 'square'
+import type { AvatarProps } from '@lib/typing'
 
-interface Props {
-  src?: string
-  name: string
-  size?: AvatarSize
-  shape?: AvatarShape
-  backgroundColor?: string
-  textColor?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<AvatarProps>(), {
   src: '',
   size: 'medium',
   shape: 'circle',
@@ -40,19 +30,15 @@ const imageError = ref(false)
 
 // 計算首字母
 const firstChar = computed(() => {
-  if (!props.name) return '?'
+  if (!props.name) return ''
   return props.name.charAt(0).toUpperCase()
 })
 
-// 計算尺寸 class
-const sizeClass = computed(() => {
-  if (typeof props.size === 'number') return ''
-  return `avatar--${props.size}`
-})
-
-// 計算形狀 class
-const shapeClass = computed(() => {
-  return `avatar--${props.shape}`
+const avatarClass = computed(() => {
+  return {
+    [`nt_avatar--${props.size}`]: typeof props.size !== 'number',
+    [`nt_avatar--${props.shape}`]: props.shape,
+  }
 })
 
 // 計算頭像 box class
@@ -125,7 +111,7 @@ const handleImageLoad = () => {
 </script>
 
 <style lang="scss" scoped>
-.avatar {
+.nt_avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;

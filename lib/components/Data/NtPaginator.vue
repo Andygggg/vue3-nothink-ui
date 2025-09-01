@@ -1,5 +1,5 @@
 <template>
-  <div class="nt_paginator_box" ref="paginatorRef">
+  <div class="nt_paginator" ref="paginatorRef">
     <div class="pre_page_dropdown" ref="dropdownRef" v-if="props.pageSize.length">
       <div class="per_page_select" @click="openDropMenu">
         <span>{{ currentCount }}</span>
@@ -19,7 +19,12 @@
       <transition name="slide-down">
         <div class="pre_page_options" v-if="isDrop">
           <ul>
-            <li v-for="value in props.pageSize" :key="value" @click="selectPage(value)" :class="{active: value === currentCount}">
+            <li
+              v-for="value in props.pageSize"
+              :key="value"
+              @click="selectPage(value)"
+              :class="{ active: value === currentCount }"
+            >
               {{ value }}
             </li>
           </ul>
@@ -52,14 +57,19 @@
     <span class="page_group">
       <template v-if="isSmallSize">
         <div class="page_input">
-          <input type="text" id="page_input" :placeholder="`${currentPage}`" @keyup.enter="handleToPage" />
+          <input
+            type="text"
+            id="page_input"
+            :placeholder="`${currentPage}`"
+            @keyup.enter="handleToPage"
+          />
           <span>/</span>
           <span>{{ props.totalPage }}</span>
         </div>
       </template>
       <template v-for="page in visiblePages" :key="page" v-else>
         <button
-          v-if=" typeof page == 'number'"
+          v-if="typeof page == 'number'"
           class="page-btn"
           :class="{ active: page === currentPage }"
           @click="toPage(page)"
@@ -121,7 +131,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, onMounted, onUnmounted, nextTick, watch, type Ref } from 'vue'
+import {
+  computed,
+  ref,
+  useTemplateRef,
+  onMounted,
+  onUnmounted,
+  nextTick,
+  watch,
+  type Ref,
+} from 'vue'
 import type { PaginatorProp } from '@lib/typing'
 
 const props = withDefaults(defineProps<PaginatorProp>(), {
@@ -145,53 +164,53 @@ const isSmallSize = ref(false)
 const dropdownRef = useTemplateRef('dropdownRef')
 const paginatorRef = useTemplateRef('paginatorRef')
 const inputRef = useTemplateRef('inputRef')
-const paginatorResizeObserver:Ref<ResizeObserver | null> = ref(null)
+const paginatorResizeObserver: Ref<ResizeObserver | null> = ref(null)
 
 //當前顯示頁數
 const visiblePages = computed(() => {
-  const pages: (number | string)[] = [];
-  const showCount = isSmallSize.value ? 1 : props.pagerCount - 1; // 固定顯示5個連續數字
-  const current = currentPage.value;
-  const total = props.totalPage;
+  const pages: (number | string)[] = []
+  const showCount = isSmallSize.value ? 1 : props.pagerCount - 1 // 固定顯示5個連續數字
+  const current = currentPage.value
+  const total = props.totalPage
 
   // === 情況1: 總頁數不足或等於5頁 ===
   if (total <= showCount) {
     for (let i = 1; i <= total; i++) {
-      pages.push(i);
+      pages.push(i)
     }
-    return pages;
+    return pages
   }
 
   // === 情況2: 總頁數大於5頁 ===
   // 計算5個連續數字的起始位置
-  let start = current - Math.floor(showCount / 2); // 讓當前頁居中
+  let start = current - Math.floor(showCount / 2) // 讓當前頁居中
 
   // 邊界修正：不能小於1
   if (start < 1) {
-    start = 1;
+    start = 1
   }
 
   // 邊界修正：確保不會包含最後一頁（為最後一頁預留空間）
   if (start + showCount - 1 >= total) {
-    start = total - showCount;
+    start = total - showCount
   }
 
   // 生成5個連續數字
   for (let i = 0; i < showCount; i++) {
-    pages.push(start + i);
+    pages.push(start + i)
   }
 
   // 如果5個連續數字沒有包含最後一頁，則添加省略號和最後一頁
   if (start + showCount - 1 < total) {
     // 只有在5個連續數字和最後一頁之間有間隔時才加省略號
     if (start + showCount < total) {
-      pages.push('...');
+      pages.push('...')
     }
-    pages.push(total);
+    pages.push(total)
   }
 
-  return pages;
-});
+  return pages
+})
 
 onMounted(() => {
   if (paginatorRef.value && props.smallLayout) {
@@ -210,9 +229,12 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 
-watch(() => props.currentPage, (newVal) => {
-  currentPage.value = newVal
-})
+watch(
+  () => props.currentPage,
+  (newVal) => {
+    currentPage.value = newVal
+  },
+)
 
 //====================================切換頁數====================================
 /**
@@ -334,7 +356,7 @@ const updateResponsiveStyle = async () => {
 </script>
 
 <style lang="scss" scoped>
-.nt_paginator_box {
+.nt_paginator {
   --nt-page-text: 15px;
   --nt-page-color: #334155;
   --nt-page-btn: #64748b;
