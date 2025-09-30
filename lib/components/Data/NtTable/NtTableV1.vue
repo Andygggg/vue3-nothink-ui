@@ -98,7 +98,7 @@
 
 <script setup lang="ts" generic="T = Record<string, any>">
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
-import NtScrollbar from './NtScrollbar.vue'
+import NtScrollbar from '../NtScrollbar.vue'
 
 import { DataSorter } from '@lib/utils'
 import type { TableProps, TableColumn } from '@lib/typing'
