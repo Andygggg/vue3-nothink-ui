@@ -51,7 +51,6 @@ const scrollWidth = ref(0)
 const scrollHeight = ref(0)
 const clientWidth = ref(0)
 const clientHeight = ref(0)
-const headerHeight = ref(0) // 表頭高度
 
 // 拖拽相關狀態
 let isDragging = false
@@ -60,6 +59,8 @@ let startClientY = 0
 let startScrollLeft = 0
 let startScrollTop = 0
 
+const topSpace = computed(() => (props.config.top ? props.config.top : 0))
+
 // 滾動條顯示判斷(x軸)
 const showHorizontalScrollbar = computed(() => {
   return scrollWidth.value > clientWidth.value
@@ -67,8 +68,8 @@ const showHorizontalScrollbar = computed(() => {
 
 // 滾動條顯示判斷(y軸)
 const showVerticalScrollbar = computed(() => {
-  const effectiveScrollHeight = scrollHeight.value - headerHeight.value
-  const effectiveClientHeight = clientHeight.value - headerHeight.value
+  const effectiveScrollHeight = scrollHeight.value - topSpace.value
+  const effectiveClientHeight = clientHeight.value - topSpace.value
 
   return effectiveScrollHeight > effectiveClientHeight
 })
@@ -85,9 +86,9 @@ const horizontalScrollbarStyle = computed(() => {
 // 滾動條 style(y軸)
 const verticalScrollbarStyle = computed(() => {
   return {
-    top: `${headerHeight.value}px`,
+    top: `${props.config.top}px`,
     right: `0px`,
-    height: `calc(100% - ${headerHeight.value}px - ${showHorizontalScrollbar.value ? props.config.size : 0}px)`,
+    height: `calc(100% - ${props.config.top}px - ${showHorizontalScrollbar.value ? props.config.size : 0}px)`,
   }
 })
 
@@ -125,8 +126,8 @@ const horizontalThumbStyle = computed(() => {
 // 滑塊尺寸計算(y軸)
 const verticalThumbHeight = computed(() => {
   if (!showVerticalScrollbar.value) return 0
-  const effectiveClientHeight = clientHeight.value - headerHeight.value
-  const effectiveScrollHeight = scrollHeight.value - headerHeight.value
+  const effectiveClientHeight = clientHeight.value - topSpace.value
+  const effectiveScrollHeight = scrollHeight.value - topSpace.value
   if (effectiveScrollHeight <= 0) return 0
   return (effectiveClientHeight / effectiveScrollHeight) * effectiveClientHeight
 })
@@ -134,8 +135,8 @@ const verticalThumbHeight = computed(() => {
 // 滑塊位置的計算(y軸)
 const verticalThumbTop = computed(() => {
   if (!showVerticalScrollbar.value) return 0
-  const effectiveClientHeight = clientHeight.value - headerHeight.value
-  const effectiveScrollHeight = scrollHeight.value - headerHeight.value
+  const effectiveClientHeight = clientHeight.value - topSpace.value
+  const effectiveScrollHeight = scrollHeight.value - topSpace.value
   const maxThumbTranslate =
     effectiveClientHeight -
     verticalThumbHeight.value -
@@ -204,7 +205,6 @@ const initScrollbar = () => {
   scrollHeight.value = scrollWrapRef.value.scrollHeight
   clientWidth.value = scrollWrapRef.value.clientWidth
   clientHeight.value = scrollWrapRef.value.clientHeight
-  headerHeight.value = props.config.top ?? 0
 }
 
 /**
@@ -254,7 +254,7 @@ const handleScrollbarMousemove = (e: MouseEvent) => {
   // 垂直滑塊可移動的最大距離
   const maxVerticalThumbTranslate =
     clientHeight.value - // 滾動區域可見高度
-    headerHeight.value - // 減去表頭的高度（因為垂直滾動條從表頭下方開始）
+    topSpace.value - // 減去表頭的高度（因為垂直滾動條從表頭下方開始）
     verticalThumbHeight.value - // 減去滑塊自身的高度
     (showHorizontalScrollbar.value ? props.config.size : 0) // 如果有水平滾動條，角落處要為它預留空間
 
@@ -263,7 +263,7 @@ const handleScrollbarMousemove = (e: MouseEvent) => {
   const maxScrollLeft = scrollWidth.value - clientWidth.value
 
   // 垂直內容可滾動的最大距離
-  const maxScrollTop = scrollHeight.value - clientHeight.value - headerHeight.value
+  const maxScrollTop = scrollHeight.value - clientHeight.value - topSpace.value
 
   // 4. 判斷是水平拖拽還是垂直拖拽，並執行對應計算
   if (startClientX !== 0 && showHorizontalScrollbar.value && maxScrollLeft > 0) {

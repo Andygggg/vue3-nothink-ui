@@ -200,17 +200,30 @@ watch(
 
 watch(
   () => props.stickyHeader,
-  (newVal) => {
-    if (!newVal) return
+  async (newVal) => {
+    // 清理舊的 observer
+    if (theadResizeObserver.value) {
+      theadResizeObserver.value.disconnect()
+      theadResizeObserver.value = null
+    }
+
+    if (!newVal) {
+      theadHeight.value = 0
+      return
+    }
+
+    await nextTick()
+
     if (headerRef.value) {
       // 1.初始化高度
       theadHeight.value = headerRef.value.offsetHeight
+      console.log(theadHeight.value)
 
       // 2.監聽尺寸變化
       theadResizeObserver.value = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          theadHeight.value = entry.contentRect.height
-        }
+        requestAnimationFrame(() => {
+          theadHeight.value = entries[0].contentRect.height
+        })
       })
 
       theadResizeObserver.value.observe(headerRef.value)
