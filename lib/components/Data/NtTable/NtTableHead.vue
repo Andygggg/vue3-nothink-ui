@@ -116,7 +116,7 @@ const getColumnStyle = (col: TableColumn) => {
   if (props.isFixed && col.fixed) {
     style.position = 'sticky'
     style.zIndex = 21
-    style.background = `var(--nt-fixed-bg)`
+    style.background = `var(--nt-fixed-header-bg)`
 
     const position = getFixedPosition(col, colIndex)
     if (col.fixed === 'left') {

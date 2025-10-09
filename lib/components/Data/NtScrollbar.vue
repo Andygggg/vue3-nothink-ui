@@ -1,22 +1,24 @@
 <template>
-  <!-- 水平滾動條 -->
-  <div
-    v-if="showHorizontalScrollbar"
-    class="nt_scrollbar_bar is-horizontal"
-    :style="horizontalScrollbarStyle"
-    @mousedown="handleScrollbarMousedown('horizontal', $event)"
-  >
-    <div class="nt_scrollbar_thumb" :style="horizontalThumbStyle"></div>
-  </div>
+  <div>
+    <!-- 水平滾動條 -->
+    <div
+      v-if="showHorizontalScrollbar"
+      class="nt_scrollbar_bar is-horizontal"
+      :style="horizontalScrollbarStyle"
+      @mousedown="handleScrollbarMousedown('horizontal', $event)"
+    >
+      <div class="nt_scrollbar_thumb" :style="horizontalThumbStyle"></div>
+    </div>
 
-  <!-- 垂直滾動條 -->
-  <div
-    v-if="showVerticalScrollbar"
-    class="nt_scrollbar_bar is-vertical"
-    :style="verticalScrollbarStyle"
-    @mousedown="handleScrollbarMousedown('vertical', $event)"
-  >
-    <div class="nt_scrollbar_thumb" :style="verticalThumbStyle"></div>
+    <!-- 垂直滾動條 -->
+    <div
+      v-if="showVerticalScrollbar"
+      class="nt_scrollbar_bar is-vertical"
+      :style="verticalScrollbarStyle"
+      @mousedown="handleScrollbarMousedown('vertical', $event)"
+    >
+      <div class="nt_scrollbar_thumb" :style="verticalThumbStyle"></div>
+    </div>
   </div>
 </template>
 
@@ -295,7 +297,7 @@ const handleScrollbarMouseup = () => {
 <style lang="scss" scoped>
 .nt_scrollbar_bar {
   // 自定義滾動條顏色變數
-  --nt-scrollbar-track: rgba(0, 0, 0, 0.1); // 滾動條軌道
+  --nt-scrollbar-track: rgba(0, 0, 0, 0); // 滾動條軌道
   --nt-scrollbar-thumb: rgba(0, 0, 0, 0.3); // 滾動條滑塊
   --nt-scrollbar-thumb-hover: rgba(0, 0, 0, 0.5); // 滑塊 hover 顏色
   --nt-scrollbar-size: 4px; // 滾動條寬度/高度

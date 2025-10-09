@@ -59,7 +59,7 @@
         </slot>
       </div>
     </section>
-    <NtScrollbar :config="scrollbarConfig"></NtScrollbar>
+    <NtScrollbar :config="scrollbarConfig" class="nt_table_scrollbar_bar"></NtScrollbar>
   </div>
 </template>
 

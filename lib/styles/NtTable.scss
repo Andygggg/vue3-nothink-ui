@@ -1,11 +1,4 @@
 .nt_table_box {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  // border-radius: 8px;
-  // border: 2px solid rgb(194, 194, 194);
-  overflow: hidden;
-
   // CSS 變數定義
   --nt-header-bg: #ffffff;
   --nt-header-color: #000000;
@@ -18,7 +11,8 @@
   --nt-stripe-bg: #f8fafc;
   --nt-hover-bg: #e8f4fd;
 
-  --nt-fixed-bg: #ffffff;
+  --nt-fixed-header-bg: #ffffff;
+  --nt-fixed-cell-bg: #ffffff;
   --nt-fixed-shadow: rgba(0, 0, 0, 0.1);
 
   --nt-sort-btn-color: #000000;
@@ -27,6 +21,19 @@
 
   --nt-loading-overlay-bg: rgba(255, 255, 255, 0.9);
   --nt-loading-color: #808081;
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  // border: 2px solid rgb(194, 194, 194);
+  overflow: hidden;
+
+  &:hover {
+    > .nt_table_scrollbar_bar {
+      display: block;
+    }
+  }
 
   // 滾動內容
   .nt_table_scroll_wrapper {
@@ -53,6 +60,10 @@
       top: 0;
       z-index: 10;
     }
+  }
+
+  > .nt_table_scrollbar_bar {
+    display: none;
   }
 }
 
@@ -123,7 +134,7 @@
 
     &.fixed-left,
     &.fixed-right {
-      background: var(--nt-fixed-bg);
+      background: var(--nt-fixed-cell-bg);
     }
   }
 
