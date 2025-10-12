@@ -1,3 +1,5 @@
+import type { Slot } from 'vue'
+
 export interface TableColumn {
   key: string // 唯一鍵
   title: string // 標題
@@ -24,14 +26,37 @@ export interface TableProps<T = any> {
   loading?: boolean // 載入狀態
 }
 
-export interface TableEditMethods {
-  handleEdit: (rowIndex: number, colIndex: number) => void
-  disableEdit: (rowIndex: number, colIndex: number) => void
-  cancelEdit: (rowIndex: number, colIndex: number) => void
-  isEditing: (rowIndex: number, colIndex: number) => boolean
-  hasEditingCells: () => boolean
-  getEditingCells: () => Array<{ rowIndex: number; colIndex: number }>
-  clearAllEditing: () => void
-  cancelAllEditing: () => void
-  confirmAllEditing: () => void
+export interface TableHeadProps {
+  header: TableColumn[]
+  isFixed: boolean
+  isSorting: (key: string, order: 'asc' | 'desc') => boolean
+  columnStyles?: Record<string, any> // 預計算的列樣式
+}
+
+export type TableHeadSlots = {
+  [K in `th_${string}`]: Slot<{
+    item: TableColumn
+    value: string
+    index: number
+  }>
+}
+
+export interface TableCellProps<T = any> {
+  header: TableColumn[]
+  data: T[]
+  isFixed: boolean
+  columnStyles?: Record<string, any>
+}
+
+export type TableCellSlots<T = any> = {
+  [K in `td_${string}`]: Slot<{
+    item: T
+    value: T[keyof T]
+    index: number
+    isEditing: boolean
+    handleEdit: () => void
+    disableEdit: () => void
+    cancelEdit: () => void
+    handleRowClick: () => void
+  }>
 }

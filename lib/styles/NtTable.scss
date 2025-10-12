@@ -135,6 +135,10 @@
     &.fixed-left,
     &.fixed-right {
       background: var(--nt-fixed-cell-bg);
+
+      &:nth-child(even) {
+        background: var(--nt-stripe-bg);
+      }
     }
   }
 

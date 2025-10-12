@@ -45,26 +45,12 @@
 </template>
 
 <script setup lang="ts">
-import type { Slot } from 'vue'
-import type { TableColumn } from '@lib/typing'
-
-export interface TableHeadProps {
-  header: TableColumn[]
-  isFixed: boolean
-  isSorting: (key: string, order: 'asc' | 'desc') => boolean
-}
-
-type TableHeadSlots = {
-  [K in `th_${string}`]: Slot<{
-    item: TableColumn
-    value: string
-    index: number
-  }>
-}
+import type { TableColumn, TableHeadProps, TableHeadSlots } from '@lib/typing'
 
 const props = withDefaults(defineProps<TableHeadProps>(), {
   header: () => [] as TableColumn[],
   isFixed: false,
+  columnStyles: () => ({}),
 })
 
 const emit = defineEmits<{
@@ -73,14 +59,7 @@ const emit = defineEmits<{
 
 defineSlots<TableHeadSlots>()
 
-/**
- * 檢查是否啟用排序
- * @param status 排序類別
- */
-const isCheckSort = (status: number | undefined) => {
-  return typeof status === 'number' ? true : false
-}
-
+//========================================css樣式========================================
 /**
  * 自訂header class
  * @param col 列配置
@@ -95,16 +74,16 @@ const getHeaderClass = (col: TableColumn) => ({
 /**
  * 自訂列 style
  * @param col 列配置
- * @param type 'header' | 'cell'
  * @returns 返回列的樣式
  */
 const getColumnStyle = (col: TableColumn) => {
+  // 如果有預計算的樣式，直接使用
+  if (props.columnStyles && props.columnStyles[col.key]) {
+    return props.columnStyles[col.key]
+  }
+
+  // 基本樣式（不包含固定列位置計算）
   const style: any = {}
-  if (!col || !col.key) return style
-
-  const colIndex = props.header.findIndex((c) => c.key === col.key)
-  if (colIndex === -1) return style
-
   if (col.width) {
     style.width = typeof col.width === 'number' ? `${col.width}px` : col.width
     style.minWidth = style.width
@@ -113,42 +92,16 @@ const getColumnStyle = (col: TableColumn) => {
     style.minWidth = typeof col.minWidth === 'number' ? `${col.minWidth}px` : col.minWidth
   if (col.align) style.textAlign = col.align
 
-  if (props.isFixed && col.fixed) {
-    style.position = 'sticky'
-    style.zIndex = 21
-    style.background = `var(--nt-fixed-header-bg)`
-
-    const position = getFixedPosition(col, colIndex)
-    if (col.fixed === 'left') {
-      style.left = position
-    } else if (col.fixed === 'right') {
-      style.right = position
-    }
-  }
-
   return style
 }
 
+//========================================資料動作========================================
 /**
- * 計算固定行的位置
- * @param col 列配置
- * @param colIndex 列在 columns 中的索引
- * @returns 返回固定行的 x 軸位置
+ * 檢查是否啟用排序
+ * @param status 排序類別
  */
-const getFixedPosition = (col: TableColumn, colIndex: number) => {
-  if (!col.fixed || colIndex === 0) return '0'
-
-  let position = '0'
-  if (col.minWidth) {
-    position = typeof col.minWidth === 'number' ? `${col.minWidth}px` : col.minWidth
-    return position
-  }
-  if (col.width) {
-    position = typeof col.width === 'number' ? `${col.width}px` : col.width
-    return position
-  }
-
-  return `${position}px`
+const isCheckSort = (status: number | undefined) => {
+  return typeof status === 'number' ? true : false
 }
 
 const handleSort = (col: TableColumn) => {

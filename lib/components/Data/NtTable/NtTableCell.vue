@@ -1,10 +1,10 @@
 <template>
-  <tr v-for="(row, rowIndex) in props.data" :key="`tr_${rowIndex}`">
+  <tr v-for="(row, rowIndex) in props.data" :key="getStableKey(row, rowIndex)">
     <td
       v-for="(col, colIndex) in props.header"
       :key="col.key"
       :class="getCellClass(col)"
-      :style="getColumnStyle(col)"
+      :style="getCachedColumnStyle(col)"
     >
       <slot
         :name="`td_${col.key}`"
@@ -24,45 +24,44 @@
 </template>
 
 <script setup lang="ts" generic="T = Record<string, any>">
-import { ref } from 'vue'
-import type { Slot } from 'vue'
-import type { TableColumn } from '@lib/typing'
-
-export interface TableCellProps<T = any> {
-  header: TableColumn[]
-  data: T[]
-  isFixed: boolean
-}
-
-// 顯式聲明插槽類型以支援泛型
-type TableCellSlots<T = any> = {
-  [K in `td_${string}`]: Slot<{
-    item: T
-    value: T[keyof T]
-    index: number
-    isEditing: boolean
-    handleEdit: () => void
-    disableEdit: () => void
-    cancelEdit: () => void
-    handleRowClick: () => void
-  }>
-}
+import { ref, computed } from 'vue'
+import type { TableColumn, TableCellProps, TableCellSlots } from '@lib/typing'
 
 const props = withDefaults(defineProps<TableCellProps<T>>(), {
   header: () => [] as TableColumn[],
   isFixed: false,
+  columnStyles: () => ({}),
 })
 
 const emit = defineEmits<{
   (e: 'cellClick', row: T, index: number): void
 }>()
 
-// 聲明插槽類型
 defineSlots<TableCellSlots<T>>()
 
-// 編輯狀態管理和其他方法保持不變...
-const editingCells = ref<Set<string>>(new Set())
-const originalValues = ref<Map<string, any>>(new Map())
+const editingCells = ref<Set<string>>(new Set())// 編輯狀態管理
+const originalValues = ref<Map<string, any>>(new Map())// 存放資料原始狀態
+
+/**
+ * 緩存列樣式
+ */
+const cachedColumnStyles = computed(() => {
+  const cache: Record<string, any> = {}
+  props.header.forEach((col) => {
+    cache[col.key] = getColumnStyle(col)
+  })
+  return cache
+})
+
+//========================================css樣式========================================
+
+/**
+ * 獲取緩存的列樣式
+ * @param col 列配置
+ */
+const getCachedColumnStyle = (col: TableColumn) => {
+  return cachedColumnStyles.value[col.key] || {}
+}
 
 const getCellClass = (col: TableColumn) => ({
   [`text-${col.align}`]: col.align,
@@ -72,12 +71,14 @@ const getCellClass = (col: TableColumn) => ({
 })
 
 const getColumnStyle = (col: TableColumn) => {
+  if (props.columnStyles && props.columnStyles[col.key]) {
+    const style = { ...props.columnStyles[col.key] }
+    style.zIndex = 20
+    return style
+  }
+
+  // 基本樣式（不包含固定列位置計算）
   const style: any = {}
-  if (!col || !col.key) return style
-
-  const colIndex = props.header.findIndex((c) => c.key === col.key)
-  if (colIndex === -1) return style
-
   if (col.width) {
     style.width = typeof col.width === 'number' ? `${col.width}px` : col.width
     style.minWidth = style.width
@@ -86,41 +87,32 @@ const getColumnStyle = (col: TableColumn) => {
     style.minWidth = typeof col.minWidth === 'number' ? `${col.minWidth}px` : col.minWidth
   if (col.align) style.textAlign = col.align
 
-  if (props.isFixed && col.fixed) {
-    style.position = 'sticky'
-    style.zIndex = 20
-
-    const position = getFixedPosition(col, colIndex)
-    if (col.fixed === 'left') {
-      style.left = position
-    } else if (col.fixed === 'right') {
-      style.right = position
-    }
-  }
-
   return style
 }
+//========================================資料格式化========================================
 
-const getFixedPosition = (col: TableColumn, colIndex: number) => {
-  if (!col.fixed || colIndex === 0) return '0'
-
-  let position = '0'
-  if (col.minWidth) {
-    position = typeof col.minWidth === 'number' ? `${col.minWidth}px` : col.minWidth
-    return position
+/**
+ * 生成row key
+ * @param row 行資料
+ * @param index 索引
+ */
+const getStableKey = (row: T, index: number): string => {
+  // 如果資料有 id 或其他唯一標識，優先使用
+  if (row && typeof row === 'object' && 'id' in row && (row as any).id) {
+    return `tr_${(row as any).id}`
   }
-  if (col.width) {
-    position = typeof col.width === 'number' ? `${col.width}px` : col.width
-    return position
-  }
-
-  return `${position}px`
+  return `tr_${index}`
 }
-//========================================資料編輯========================================
 
+/**
+ * 生成cell key
+ * @param rowIndex 行資料
+ * @param colIndex 列索引
+ */
 const getCellKey = (rowIndex: number, colIndex: number): string => {
   return `${rowIndex}-${colIndex}`
 }
+//========================================資料編輯========================================
 
 /**
  * 檢查單元格是否正在編輯
