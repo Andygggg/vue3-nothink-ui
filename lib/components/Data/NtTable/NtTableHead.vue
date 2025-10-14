@@ -11,11 +11,12 @@
         <span>{{ col.title }}</span>
       </slot>
       <span class="sort_btn" v-if="isCheckSort(col.sortable)">
-        <i v-show="props.isSorting(col.key, 'asc')">
+        <i>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
             viewBox="0 0 24 24"
+            v-show="props.isSorting(col.key, 'asc')"
           >
             <g fill="none">
               <path
@@ -25,11 +26,12 @@
             </g>
           </svg>
         </i>
-        <i v-show="props.isSorting(col.key, 'desc')">
+        <i>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
             viewBox="0 0 24 24"
+            v-show="props.isSorting(col.key, 'desc')"
           >
             <g fill="none">
               <path

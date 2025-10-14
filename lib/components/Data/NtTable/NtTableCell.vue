@@ -39,8 +39,8 @@ const emit = defineEmits<{
 
 defineSlots<TableCellSlots<T>>()
 
-const editingCells = ref<Set<string>>(new Set())// 編輯狀態管理
-const originalValues = ref<Map<string, any>>(new Map())// 存放資料原始狀態
+const editingCells = ref<Set<string>>(new Set()) // 編輯狀態管理
+const originalValues = ref<Map<string, any>>(new Map()) // 存放資料原始狀態
 
 /**
  * 緩存列樣式
@@ -123,19 +123,6 @@ const isEditing = (rowIndex: number, colIndex: number): boolean => {
   return editingCells.value.has(getCellKey(rowIndex, colIndex))
 }
 
-/**檢查是否有任何單元格正在編輯 */
-const hasEditingCells = (): boolean => {
-  return editingCells.value.size > 0
-}
-
-/**獲取正在編輯的單元格列表 */
-const getEditingCells = (): Array<{ rowIndex: number; colIndex: number }> => {
-  return Array.from(editingCells.value).map((cellKey) => {
-    const [rowIndex, colIndex] = cellKey.split('-').map(Number)
-    return { rowIndex, colIndex }
-  })
-}
-
 /**
  * 單元格編輯
  * @param rowIndex 行索引
@@ -177,25 +164,9 @@ const cancelEdit = (rowIndex: number, colIndex: number) => {
   disableEdit(rowIndex, colIndex)
 }
 
-/**清除所有編輯狀態 */
-const clearAllEditing = (): void => {
-  editingCells.value.clear()
-  originalValues.value.clear()
-}
-
 const handleRowClick = (row: T, index: number) => {
   emit('cellClick', row, index)
 }
-
-defineExpose({
-  handleEdit,
-  disableEdit,
-  cancelEdit,
-  isEditing,
-  hasEditingCells,
-  getEditingCells,
-  clearAllEditing,
-})
 </script>
 
 <style lang="scss" scoped>

@@ -81,8 +81,6 @@ const props = withDefaults(defineProps<TableProps<T>>(), {
   stripe: false,
   cellBorder: false,
   hover: false,
-  scrollX: false,
-  scrollY: false,
   stickyHeader: false,
   maxHeight: 'auto',
   emptyText: 'No Data',
@@ -93,12 +91,12 @@ const emit = defineEmits<{
   (e: 'rowClick', row: T, index: number): void
 }>()
 
-const sortManager = new DataSorter<T>(props.data)//排序管理器
-const sortedData = ref<T[]>([...props.data])// 排序後的資料
+const sortManager = new DataSorter<T>(props.data) //排序管理器
+const sortedData = ref<T[]>([...props.data]) // 排序後的資料
 
 const tableWrapper = useTemplateRef('tableWrapper') // 包裝容器引用
-const scrollWrapRef =useTemplateRef('scrollWrapRef') // 滾動容器引用
-const headerRef =useTemplateRef('headerRef') // 表頭引用
+const scrollWrapRef = useTemplateRef('scrollWrapRef') // 滾動容器引用
+const headerRef = useTemplateRef('headerRef') // 表頭引用
 
 const tableHeight = ref(0) // 當前表格高度
 const theadHeight = ref(0) // 當前表頭高度
@@ -131,9 +129,8 @@ const tableMaxHeight = computed(() => {
           : props.maxHeight
   }
 
-  if (style.maxHeight) {
-    style.maxHeight = '100%'
-  }
+  if (!style.maxHeight) style.maxHeight = '100%'
+
   return style
 })
 

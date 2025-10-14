@@ -18,8 +18,6 @@ export interface TableProps<T = any> {
   stripe?: boolean // 條紋
   cellBorder?: boolean // 邊框
   hover?: boolean // hover效果
-  scrollX?: boolean // 水平滾動
-  scrollY?: boolean // 垂直滾動
   stickyHeader?: boolean // 表頭固定
   maxHeight?: string | number // 最大高度
   emptyText?: string // 空狀態文字
